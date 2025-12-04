@@ -394,8 +394,8 @@ Web3 Researcher • Security Engineer • Frontend Developer
 
 ## 📜 License
 
-Released under the **MIT License**.
-Feel free to fork, remix, and use PowebPoint for your own talks, courses, or cinematic slide decks.
+### Released under the **MIT License**.
+### Feel free to fork, remix, and use PowebPoint for your own talks, courses, or cinematic slide decks.
 
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&height=140&section=footer&color=0:f97316,50:ec4899,100:6366f1&animation=twinkling" width="100%" alt="footer" />
