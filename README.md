@@ -1,20 +1,50 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Radikal Presenter
 
-# Run and deploy your AI Studio app
+Radikal Presenter is a high-end, 3D-enhanced presentation platform that replaces traditional slide decks with immersive web technologies. It features a spatial 3D carousel for overview and a focused presentation mode, complete with a built-in slide builder.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1paX4vEbDknjGHLYiIg2vnBJLgurN6W8_
+- **Immersive 3D Experience**: Navigate slides in a 3D space with smooth camera transitions between Overview and Focus modes.
+- **Built-in Builder**: Create and edit slides directly in the app with a real-time preview (2D and 3D).
+- **Rich Slide Types**: Hero, Article, Split Content, Timeline, Grid, Statistics, Team, Gallery, and more.
+- **Bi-directional Support**: Fully supports LTR (English) and RTL (Farsi/Persian) layouts, including typography changes.
+- **Customizable Design**: Themes (Light/Dark), custom backgrounds, gradients, and procedural patterns.
+- **Auto-Save**: Work is automatically saved to local storage.
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
+- **Framework**: React 18
+- **Language**: TypeScript
+- **3D Engine**: Three.js, @react-three/fiber, @react-three/drei
+- **Animations**: Framer Motion, Framer Motion 3D
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
 
+## Installation & Setup
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+## Usage
+
+### Presentation Mode
+- **Navigation**: Use Left/Right arrow keys or the on-screen controls.
+- **Overview**: Scroll or use the "Overview" button to zoom out to the 3D carousel. Drag to rotate.
+- **Focus**: Double-click a slide in overview mode to focus on it.
+
+### Builder Mode
+- **Edit**: Click the "Edit" (pencil) icon in the dashboard to enter the Builder.
+- **Manage Slides**: Add, remove, duplicate, or reorder slides in the left panel.
+- **Edit Content**: Use the properties panel on the right to update text (supports Markdown), images, and specific slide data.
+- **Design**: Customize colors, fonts, and backgrounds in the Design tab.
+- **Preview**: Toggle between 2D and 3D preview modes to see how your slide looks in the spatial environment.
+
+---
+Created by [Mohammad Shirvani](https://github.com/0xradikal)
