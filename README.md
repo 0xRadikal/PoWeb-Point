@@ -32,6 +32,13 @@ Radikal Presenter is a high-end, 3D-enhanced presentation platform that replaces
     npm run dev
     ```
 
+## NPM Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the app for production.
+- `npm run preview`: Locally preview the production build.
+- `npm run lint`: Runs the linter.
+
 ## Usage
 
 ### Presentation Mode
