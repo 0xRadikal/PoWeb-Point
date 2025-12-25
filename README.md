@@ -418,3 +418,4 @@ You are free to fork, modify, and use Radikal Presenter for your own talks, cour
   <img src="https://capsule-render.vercel.app/api?type=waving&height=140&section=footer&color=0:f97316,50:ec4899,100:6366f1&animation=twinkling" width="100%" alt="footer" />
 </p>
 ```
+@radikal1_2006
