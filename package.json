@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+        "build:pwa": "vite build",
     "preview": "vite preview"
+    
   },
   "dependencies": {
     "react": "18.2.0",

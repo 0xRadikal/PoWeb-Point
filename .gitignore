@@ -11,6 +11,16 @@ node_modules
 dist
 dist-ssr
 *.local
+# Android/TWA artifacts
+android-twa/keystore.jks
+android-twa/*.jks
+android-twa/keystore.properties
+android-twa/app/build
+android-twa/.gradle
+android-twa/.idea
+android-twa/*.apk
+android-twa/*.aab
+android-twa/local.properties
 
 # Editor directories and files
 .vscode/*

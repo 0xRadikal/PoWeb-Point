@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { AnimatePresence, motion as _motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
 import { AppProvider, useApp } from './core/store';
@@ -143,7 +143,16 @@ const EditToggle = () => {
 
 const AppContent: React.FC = () => {
   const { mode, currentSlideIndex, slides, nextSlide, prevSlide, setMode, t, startTransitionToPresentation, setCameraMode, isTransitioning, setCurrentSlideIndex } = useApp();
-
+      const isLowEndDevice = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    const navigatorWithMemory = navigator as Navigator & { deviceMemory?: number };
+    const deviceMemory = navigatorWithMemory.deviceMemory ?? 4;
+    const hardwareConcurrency = navigator.hardwareConcurrency ?? 4;
+    return deviceMemory <= 4 || hardwareConcurrency <= 4;
+  }, []);
+  const maxDpr = isLowEndDevice ? 1.25 : 2;
+  const antialias = !isLowEndDevice;
+  const powerPreference = isLowEndDevice ? 'low-power' : 'high-performance';
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (mode === 'builder' || isTransitioning) return;
@@ -167,9 +176,9 @@ const AppContent: React.FC = () => {
         {mode === 'dashboard' && (
             <Canvas 
                 shadows 
-                dpr={[1, 2]} // Optimization: Limit pixel ratio to max 2 for performance
+                dpr={[1, maxDpr]} // Optimization: Limit pixel ratio based on device capability
                 camera={{ fov: 45 }} 
-                gl={{ antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: false }}
+                gl={{ antialias, powerPreference, preserveDrawingBuffer: false }}
             >
                 <DashboardScene />
             </Canvas>
