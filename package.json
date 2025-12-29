@@ -6,20 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-        "build:pwa": "vite build",
+    "build:pwa": "vite build",
     "preview": "vite preview"
-    
   },
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "three": "0.160.0",
-    "@react-three/fiber": "8.15.19",
     "@react-three/drei": "9.105.4",
+    "@react-three/fiber": "8.15.19",
+    "adb": "^0.2.0",
     "framer-motion": "10.18.0",
     "framer-motion-3d": "10.18.0",
     "lucide-react": "0.344.0",
-    "react-markdown": "9.0.1"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-markdown": "9.0.1",
+    "three": "0.160.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
