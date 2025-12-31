@@ -1,42 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright 2021 Google Inc. All Rights Reserved.
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-         http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources>
-  
 
-  <!--
-    The "fullscreen" and "fullscreen-sticky" TWA manifest values correspond to "immersive" and "sticky-immersive"
-    AndroidManifest values.
-  -->
-  
+    <!-- App labels -->
+    <string name="appName">Radikals</string>
+    <string name="launcherName">Radikals</string>
 
-  <!--
-    This variable below expresses the relationship between the app and the site,
-    as documented in the TWA documentation at
-    https://developers.google.com/web/updates/2017/10/using-twa#set_up_digital_asset_links_in_an_android_app
-    and is injected into the AndroidManifest.xml
-  -->
-  <string name="assetStatements">
-    [{
-        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-        \"target\": {
-            \"namespace\": \"web\",
-            \"site\": \"https://radikals.fun\"
+    <!-- Core URL config (MUST NOT be empty) -->
+    <string name="launchUrl">https://radikals.fun/</string>
+    <string name="hostName">radikals.fun</string>
+
+    <!-- Web Manifest URL (should be reachable) -->
+    <string name="webManifestUrl">https://radikals.fun/manifest.webmanifest</string>
+
+    <!-- Asset Links statements (string resource, referenced by android:resource in Manifest) -->
+    <string name="assetStatements">[
+        {
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "web",
+                "site": "https://radikals.fun"
+            }
         }
-    }]
-    
-  </string>  
+    ]</string>
+
+    <!-- TWA generator metadata -->
+    <string name="generatorApp">android-browser-helper</string>
+
+    <!-- FileProvider authority; must match Manifest provider authorities -->
+    <string name="providerAuthority">fun.radikals.app.fileprovider</string>
+
+    <!-- Orientation config used by ABH meta-data -->
+    <!-- Valid values typically: "portrait", "landscape", "any" (depending on your ABH version/config) -->
+    <string name="orientation">portrait</string>
+
 </resources>
