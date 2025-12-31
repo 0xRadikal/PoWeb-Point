@@ -11,14 +11,10 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-/**
- * Keep this manifest map only for values that we DO NOT duplicate in res/values.
- * Strings MUST live in strings.xml (otherwise you’ll hit duplicate resource errors).
- */
+
 def twaConfig = [
     applicationId: 'fun.radikals.app',
 
-    // Visuals (generated as @color via resValue)
     themeColor: '#000000',
     themeColorDark: '#000000',
     navigationColor: '#000000',
@@ -27,20 +23,16 @@ def twaConfig = [
     navigationDividerColorDark: '#000000',
     backgroundColor: '#FFFFFF',
 
-    // Delegation + splash (generated as @bool/@integer via resValue)
     enableNotifications: true,
     splashScreenFadeOutDuration: 300,
 
-    // Optional (generated as @string via resValue IF you don’t define them in strings.xml)
-    fallbackType: 'webview', // keep consistent with Manifest FALLBACK_STRATEGY=webview
+    fallbackType: 'webview', 
     enableSiteSettingsShortcut: true,
 
-    // App shortcuts (optional)
     shortcuts: []
 ]
 
 android {
-    // Android 16 = API 36 :contentReference[oaicite:2]{index=2}
     compileSdk 36
 
     namespace "fun.radikals.app"
@@ -48,18 +40,11 @@ android {
     defaultConfig {
         applicationId twaConfig.applicationId
         minSdk 21
-        // Keeping your target at 35 is fine; upgrade to 36 when ready.
         targetSdk 35
 
         versionCode 1
         versionName "1"
 
-        // IMPORTANT:
-        // Do NOT generate strings that already exist in res/values/strings.xml:
-        // appName, launcherName, launchUrl, hostName, webManifestUrl, assetStatements,
-        // generatorApp, providerAuthority, orientation
-
-        // Colors referenced by Manifest (@color/...)
         resValue "color", "colorPrimary", twaConfig.themeColor
         resValue "color", "colorPrimaryDark", twaConfig.themeColorDark
         resValue "color", "navigationColor", twaConfig.navigationColor
@@ -68,11 +53,9 @@ android {
         resValue "color", "navigationDividerColorDark", twaConfig.navigationDividerColorDark
         resValue "color", "backgroundColor", twaConfig.backgroundColor
 
-        // Values referenced by Manifest (@bool/@integer)
         resValue "bool", "enableNotification", twaConfig.enableNotifications.toString()
         resValue "integer", "splashScreenFadeOutDuration", twaConfig.splashScreenFadeOutDuration.toString()
 
-        // Optional resources (only keep if you are NOT defining them in strings.xml)
         resValue "string", "fallbackType", twaConfig.fallbackType
         resValue "bool", "enableSiteSettingsShortcut", twaConfig.enableSiteSettingsShortcut.toString()
     }
@@ -80,7 +63,7 @@ android {
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
+                storeFile rootProject.file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
@@ -88,26 +71,26 @@ android {
         }
     }
 
-    buildTypes {
-        debug {
-            // default debug signing is fine
-            minifyEnabled false
-        }
-        release {
-            // You can flip to true later if you have proguard rules in place.
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
-            if (keystorePropertiesFile.exists()) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
-        }
+buildTypes {
+    debug {
+        minifyEnabled false
     }
 
+    release {
+        minifyEnabled false
+        shrinkResources false
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+        if (!keystorePropertiesFile.exists()) {
+            throw new GradleException("Missing keystore.properties in android-twa root. Create android-twa/keystore.properties")
+        }
+        signingConfig signingConfigs.release
+    }
+}
+
+
     compileOptions {
-        // ABH works fine with Java 8 language level
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -117,10 +100,6 @@ android {
     }
 }
 
-/**
- * Generate shortcuts.xml (if you use shortcuts). Safe when list is empty.
- * Note: Android supports up to 4 dynamic shortcuts here.
- */
 tasks.register("generateShortcutsFile") {
     doLast {
         if (twaConfig.shortcuts == null) return
@@ -173,6 +152,5 @@ tasks.named("preBuild").configure {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // Android Browser Helper
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2' // :contentReference[oaicite:3]{index=3}
 }
