@@ -32,3 +32,9 @@ android-twa/local.properties
 *.njsproj
 *.sln
 *.sw?
+# Keystore / signing
+**/keystore.properties
+**/*.jks
+**/*.keystore
+# Environment variables
+.env

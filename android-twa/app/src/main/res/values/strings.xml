@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- App labels -->
     <string name="appName">Radikals</string>
     <string name="launcherName">Radikals</string>
 
-    <!-- Core URL config (MUST NOT be empty) -->
     <string name="launchUrl">https://radikals.fun/</string>
     <string name="hostName">radikals.fun</string>
 
-    <!-- Web Manifest URL (should be reachable) -->
     <string name="webManifestUrl">https://radikals.fun/manifest.webmanifest</string>
 
-    <!-- Asset Links statements (string resource, referenced by android:resource in Manifest) -->
     <string name="assetStatements">[
         {
             "relation": ["delegate_permission/common.handle_all_urls"],
@@ -23,14 +19,9 @@
         }
     ]</string>
 
-    <!-- TWA generator metadata -->
     <string name="generatorApp">android-browser-helper</string>
 
-    <!-- FileProvider authority; must match Manifest provider authorities -->
     <string name="providerAuthority">fun.radikals.app.fileprovider</string>
-
-    <!-- Orientation config used by ABH meta-data -->
-    <!-- Valid values typically: "portrait", "landscape", "any" (depending on your ABH version/config) -->
     <string name="orientation">portrait</string>
 
 </resources>

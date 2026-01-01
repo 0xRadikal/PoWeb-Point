@@ -1,40 +1,52 @@
+// android-twa/app/build.gradle  (Groovy)
+
 import groovy.xml.MarkupBuilder
 import groovy.util.IndentPrinter
+import java.util.Properties
 
 plugins {
     id 'com.android.application'
 }
 
+/**
+ * --- Keystore (Release) ---
+ * این فایل باید داخل android-twa/keystore.properties باشد (کنار settings.gradle)
+ * و حتماً وجود داشته باشد تا Release همیشه با همان کلید امضا شود.
+ */
 def keystorePropertiesFile = rootProject.file('keystore.properties')
 def keystoreProperties = new Properties()
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+if (!keystorePropertiesFile.exists()) {
+    throw new GradleException("Missing keystore.properties in android-twa root. Create android-twa/keystore.properties")
 }
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-
+/**
+ * --- TWA Config ---
+ * نکته: fallbackType باید string باشد.
+ */
 def twaConfig = [
-    applicationId: 'fun.radikals.app',
+        applicationId               : 'fun.radikals.app',
 
-    themeColor: '#000000',
-    themeColorDark: '#000000',
-    navigationColor: '#000000',
-    navigationColorDark: '#000000',
-    navigationDividerColor: '#000000',
-    navigationDividerColorDark: '#000000',
-    backgroundColor: '#FFFFFF',
+        themeColor                  : '#000000',
+        themeColorDark              : '#000000',
+        navigationColor             : '#000000',
+        navigationColorDark         : '#000000',
+        navigationDividerColor      : '#000000',
+        navigationDividerColorDark  : '#000000',
+        backgroundColor             : '#FFFFFF',
 
-    enableNotifications: true,
-    splashScreenFadeOutDuration: 300,
+        enableNotifications         : true,
+        splashScreenFadeOutDuration : 300,
 
-    fallbackType: 'webview', 
-    enableSiteSettingsShortcut: true,
+        fallbackType                : 'webview',
+        enableSiteSettingsShortcut  : true,
 
-    shortcuts: []
+        shortcuts                   : []
 ]
 
 android {
     compileSdk 36
-
     namespace "fun.radikals.app"
 
     defaultConfig {
@@ -45,6 +57,7 @@ android {
         versionCode 1
         versionName "1"
 
+        // Colors (Manifest references @color/...)
         resValue "color", "colorPrimary", twaConfig.themeColor
         resValue "color", "colorPrimaryDark", twaConfig.themeColorDark
         resValue "color", "navigationColor", twaConfig.navigationColor
@@ -53,44 +66,51 @@ android {
         resValue "color", "navigationDividerColorDark", twaConfig.navigationDividerColorDark
         resValue "color", "backgroundColor", twaConfig.backgroundColor
 
+        // Values (Manifest references @bool/@integer)
         resValue "bool", "enableNotification", twaConfig.enableNotifications.toString()
         resValue "integer", "splashScreenFadeOutDuration", twaConfig.splashScreenFadeOutDuration.toString()
 
+        // Optional
         resValue "string", "fallbackType", twaConfig.fallbackType
         resValue "bool", "enableSiteSettingsShortcut", twaConfig.enableSiteSettingsShortcut.toString()
     }
 
     signingConfigs {
         release {
-            if (keystorePropertiesFile.exists()) {
-                storeFile rootProject.file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            }
+            // مهم: اگر storeFile را در keystore.properties با مسیر relative گذاشتی
+            // (مثلاً radikals-release.jks)، این file(...) درست resolve می‌کند.
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+
+            // اختیاری: برای اینکه خطاهای خالی بودن مقادیر را همان اول بفهمی
+            if (!storeFile?.exists()) throw new GradleException("Keystore file not found: ${storeFile}")
+            if (!storePassword) throw new GradleException("Missing storePassword in keystore.properties")
+            if (!keyAlias) throw new GradleException("Missing keyAlias in keystore.properties")
+            if (!keyPassword) throw new GradleException("Missing keyPassword in keystore.properties")
         }
     }
 
-buildTypes {
-    debug {
-        minifyEnabled false
-    }
-
-    release {
-        minifyEnabled false
-        shrinkResources false
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
-        if (!keystorePropertiesFile.exists()) {
-            throw new GradleException("Missing keystore.properties in android-twa root. Create android-twa/keystore.properties")
+    buildTypes {
+        debug {
+            minifyEnabled false
         }
-        signingConfig signingConfigs.release
-    }
-}
 
+        release {
+            // برای اینکه دردسر کمتر باشد
+            minifyEnabled false
+            shrinkResources false
+
+            // حتی اگر minifyEnabled=false باشد، داشتنش مشکلی ندارد
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.release
+        }
+    }
 
     compileOptions {
-
+        // برای ABH / TWA مشکلی ندارد
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -100,6 +120,9 @@ buildTypes {
     }
 }
 
+/**
+ * Generate shortcuts.xml (اگر shortcuts خالی باشد هم مشکلی ندارد)
+ */
 tasks.register("generateShortcutsFile") {
     doLast {
         if (twaConfig.shortcuts == null) return
@@ -152,5 +175,6 @@ tasks.named("preBuild").configure {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2' // :contentReference[oaicite:3]{index=3}
+    // Android Browser Helper
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 }
