@@ -3,10 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../core/store';
 import { 
     X, Layout, Type, Image as ImageIcon, Box, Sliders, Settings, 
-    BookOpen, Layers, Zap, MousePointerClick, Globe, Keyboard, 
-    Monitor, Grid, List, Users, Calendar, ArrowRightCircle, 
+    BookOpen, MousePointerClick, Keyboard, 
+    Grid, List, Users, Calendar, ArrowRightCircle, 
     Split, Quote, Images, Hash, FileText, Megaphone, BarChart3,
-    CheckCircle2, AlertCircle, ChevronRight, Menu
+    CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

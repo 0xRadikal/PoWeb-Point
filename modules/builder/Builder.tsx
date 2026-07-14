@@ -4,7 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useApp } from '../../core/store';
-import { CheckSquare, Play, Eye, Box, Monitor, Unlock, Lock, RotateCcw, Layers, Sliders, ChevronLeft, ChevronRight, Settings, BookOpen, LayoutGrid } from 'lucide-react';
+import { CheckSquare, Play, Eye, Box, Monitor, Unlock, Lock, RotateCcw, Layers, Sliders, Settings, BookOpen, LayoutGrid } from 'lucide-react';
 import { SlideManager } from './SlideManager';
 import { SlideEditor } from './SlideEditor';
 import { UserGuide } from '../../components/Builder/UserGuide';

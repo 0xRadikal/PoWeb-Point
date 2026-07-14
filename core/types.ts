@@ -1,4 +1,4 @@
-import { ThreeElements } from '@react-three/fiber';
+// R3F JSX intrinsic elements are augmented globally in ./three-jsx.d.ts
 
 export type SlideType = 'content-image' | 'list' | 'big-number' | 'timeline' | 'comparison' | 'grid' | 'stats' | 'hero' | 'article' | 'quote' | 'gallery' | 'team' | 'process' | 'cta';
 export type Language = 'en' | 'fa';

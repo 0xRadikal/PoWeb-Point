@@ -1,7 +1,7 @@
 
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Environment, ContactShadows, Sparkles, Stars, Float } from '@react-three/drei';
+import { Environment, ContactShadows, Sparkles, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { useApp } from '../../core/store';
 import { CarouselRing } from './Carousel';

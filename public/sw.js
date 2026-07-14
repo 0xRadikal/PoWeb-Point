@@ -2,21 +2,30 @@ const CACHE_VERSION = 'v1';
 const CORE_CACHE = `radikals-core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `radikals-runtime-${CACHE_VERSION}`;
 
+// Only the app shell that is guaranteed to exist in the build output. Styling
+// is delivered via the Tailwind CDN, so there is no local /index.css to cache.
+// Hashed JS/CSS chunks are cached at runtime (cacheFirst) rather than listed
+// here, because their names change every build.
 const CORE_ASSETS = [
   { url: '/', revision: '1' },
   { url: '/index.html', revision: '1' },
-  { url: '/manifest.json', revision: '1' },
-  { url: '/index.css', revision: '1' }
+  { url: '/manifest.webmanifest', revision: '1' }
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CORE_CACHE).then((cache) => {
-      const requests = CORE_ASSETS.map((asset) =>
-        new Request(`${asset.url}?rev=${asset.revision}`, { cache: 'reload' })
-      );
-      return cache.addAll(requests);
-    })
+    caches.open(CORE_CACHE).then((cache) =>
+      // Add assets individually so one missing/404 asset cannot abort the whole
+      // install (cache.addAll is atomic and would leave the SW uninstalled).
+      Promise.all(
+        CORE_ASSETS.map((asset) => {
+          const request = new Request(`${asset.url}?rev=${asset.revision}`, { cache: 'reload' });
+          return cache.add(request).catch((error) => {
+            console.warn('[sw] Failed to precache asset, skipping:', asset.url, error);
+          });
+        })
+      )
+    )
   );
   self.skipWaiting();
 });
@@ -60,7 +69,9 @@ const networkFirst = async (request) => {
       cache.put(request, response.clone());
     }
     return response;
-  } catch (error) {
+  } catch {
+    // Network failed (e.g. offline). Fall back to the runtime cache, then to
+    // the cached app shell so navigations still work offline.
     const cache = await caches.open(RUNTIME_CACHE);
     const cached = await cache.match(request);
     if (cached) return cached;

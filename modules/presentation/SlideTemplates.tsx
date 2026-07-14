@@ -1,11 +1,11 @@
 
 
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo } from 'react';
 import { motion as _motion } from 'framer-motion';
 import { SlideData, SlideStyle } from '../../core/types';
 import ReactMarkdown from 'react-markdown';
-import { Quote, ArrowRight, ExternalLink, MousePointerClick, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { Quote, ArrowRight, ExternalLink, MousePointerClick, AlertCircle } from 'lucide-react';
 
 const motion = _motion as any;
 
@@ -102,7 +102,7 @@ export const getStyleClasses = (slide: SlideData) => {
     const fontFamily = font === 'serif' ? 'font-serif' : font === 'mono' ? 'font-mono' : 'font-sans';
     const align = slide.style?.textAlignment || 'left';
     
-    let bgStyle: React.CSSProperties = {};
+    const bgStyle: React.CSSProperties = {};
     if (slide.style?.backgroundType === 'solid' && slide.style?.backgroundColor) {
         bgStyle.backgroundColor = slide.style.backgroundColor;
     } else if (slide.style?.backgroundType === 'gradient' && slide.style?.gradientColors) {

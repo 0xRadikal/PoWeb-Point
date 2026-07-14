@@ -17,13 +17,30 @@ interface SlideViewerProps {
 
 export const SlideViewer: React.FC<SlideViewerProps> = ({ slide, isPreview = false }) => {
   const { nextSlide, prevSlide, currentSlideIndex, slides, setMode, t, theme } = useApp();
+
+  // Guard: currentSlideIndex can point out of bounds (e.g. after deleting the
+  // last slide, or when the deck is empty). Without this, downstream access to
+  // `slide.type` / `slide.style` throws a TypeError with no recovery path.
+  if (!slide) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 gap-4">
+        <p className="text-lg font-medium">{t?.noSlides ?? 'No slide to display'}</p>
+        <button
+          onClick={() => setMode('dashboard')}
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+        >
+          {t?.backToDashboard ?? 'Back to Editor'}
+        </button>
+      </div>
+    );
+  }
+
   const isLastSlide = currentSlideIndex === slides.length - 1;
   const style = getStyleClasses(slide);
   const patternStyle = getPatternStyle(slide.style || {}, theme === 'dark');
 
   // Determine if default background should be shown
   const hasCustomBg = !!(style.bgStyle.backgroundColor || style.bgStyle.backgroundImage);
-  const isDark = theme === 'dark';
 
   return (
     <div 

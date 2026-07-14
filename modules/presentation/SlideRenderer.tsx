@@ -32,6 +32,8 @@ interface SlideRendererProps {
  * 2. Add the case here.
  */
 export const SlideRenderer: React.FC<SlideRendererProps> = ({ slide }) => {
+    // Defensive guard: never dereference `.type` on an undefined slide.
+    if (!slide) return null;
     switch (slide.type) {
         case 'hero': return <HeroSlide slide={slide} />;
         case 'article': return <ArticleSlide slide={slide} />;

@@ -68,7 +68,7 @@ export const Sidebar: React.FC = () => {
                                </div>
                                
                                <div className="ltr:ml-5 ltr:border-l rtl:mr-5 rtl:border-r border-slate-200 dark:border-slate-800 ltr:pl-4 rtl:pr-4 space-y-2">
-                                   {sectionSlides.map((s, idx) => {
+                                   {sectionSlides.map((s) => {
                                        const globalIndex = slides.findIndex(gs => gs.id === s.id);
                                        const isSlideActive = globalIndex === currentSlideIndex;
 

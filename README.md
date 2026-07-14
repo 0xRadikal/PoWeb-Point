@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/0xradikal/radikal-presenter">
-    <img src="https://img.shields.io/badge/Repo-Radikal_Presenter-6366f1?style=for-the-badge&logo=github" alt="Repo" />
+  <a href="https://github.com/0xRadikal/PoWeb-Point">
+    <img src="https://img.shields.io/badge/Repo-PoWeb--Point-6366f1?style=for-the-badge&logo=github" alt="Repo" />
   </a>
   <a href="https://github.com/0xradikal">
     <img src="https://img.shields.io/badge/Made_by-Radikal.eth-ec4899?style=for-the-badge&logo=ethereum" alt="Author" />
@@ -59,7 +59,7 @@
 | Built-in User Guide       | In-app documentation, accessible on all screen sizes                        | ✅     |
 | 3D camera config          | Advanced controls for both 3D modes (distance, tilt, orbit, FOV, easing)    | ✅     |
 | Security hardening        | URL validation, file size/type checks, markdown XSS mitigation              | ✅     |
-| Testing & CI              | (Planned: unit, integration, E2E)                                           | 🕓 planned |
+| Testing & CI              | Vitest unit tests + ESLint + typecheck, wired into GitHub Actions CI        | ✅     |
 | Export (PDF/PPTX)         | Export flows (PDF / PPTX / JSON)                                            | 🕓 planned |
 
 ---
@@ -68,54 +68,72 @@
 
 > Exact versions live in `package.json`.
 
-- **Framework:** React 18 (Next.js / SPA style architecture)
+- **Framework:** React 18 (Vite-powered single-page app — no server framework)
 - **Language:** TypeScript
+- **Build tool:** Vite
 - **3D Engine:** Three.js, `@react-three/fiber`, `@react-three/drei`
-- **Animations:** Framer Motion, Framer Motion 3D
-- **Styling:** Tailwind CSS (utility-first, responsive)
+- **Animations:** Framer Motion
+- **Styling:** Tailwind CSS via CDN (utility-first, responsive)
 - **State Management:** Custom store (`core/store.tsx`) with undo/redo history
 - **Persistence:** `localStorage` (+ debounced saves)
 - **Markdown:** React Markdown with safe configuration
+- **PWA:** Service worker (`public/sw.js`) + web app manifest
+- **Tooling:** ESLint (flat config) + Vitest + GitHub Actions CI
 
 ---
 
 ## 🗂 Project Structure (High-level)
 
 ```text
-radikal-presenter/
+PoWeb-Point/
+├─ index.html             # App entry HTML (loads Tailwind CDN + module script)
+├─ index.tsx              # React bootstrap (mounts <App/> inside ErrorBoundary)
+├─ App.tsx                # Root component: modes, canvas, keyboard nav
+├─ register-sw.ts         # Service worker registration
+│
 ├─ core/
-│  ├─ store.tsx          # Global state, history (undo/redo), camera & config
-│  ├─ slideUtils.ts      # Shared slide helpers (truncate, layout, typography)
-│  └─ i18n.ts             # Language + RTL/LTR utilities
+│  ├─ store.tsx           # Global state, history (undo/redo), camera & config
+│  ├─ constants.ts        # Default deck, fonts, camera config, i18n dictionary
+│  ├─ types.ts            # Shared TypeScript types
+│  ├─ id.ts               # Collision-safe id generator (crypto.randomUUID + fallback)
+│  ├─ id.test.ts          # Vitest unit tests for id generation
+│  └─ three-jsx.d.ts      # R3F JSX type augmentation
 │
 ├─ modules/
 │  ├─ builder/
 │  │  ├─ Builder.tsx       # Main builder shell
 │  │  ├─ EditorPanels.tsx  # General / Content / Design / Animation panels
-│  │  ├─ SectionsOutline.tsx
-│  │  ├─ SlideOutline.tsx
-│  │  └─ UserGuide.tsx     # In-app documentation (EN/FA)
+│  │  ├─ SlideEditor.tsx   # Slide editing surface
+│  │  └─ SlideManager.tsx  # Sections + slides outline / management
 │  │
 │  ├─ presentation/
 │  │  ├─ SlideRenderer.tsx   # 2D slide renderer
 │  │  ├─ SlideTemplates.tsx  # 2D templates for each slide type
-│  │  └─ Controls.tsx        # Progress, navigation, quick start, etc.
+│  │  └─ SlideViewer.tsx     # Presentation-mode slide viewer
 │  │
 │  └─ three/
-│     ├─ Scene.tsx         # Three.js scene + global camera logic
-│     ├─ Carousel.tsx      # 3D carousel layout & interactions
-│     ├─ SlideCard.tsx     # Slide card mesh (geometry + materials)
-│     └─ SlideContent3D.tsx# 3D slide content rendering (text, tags, effects)
+│     ├─ Scene.tsx          # Three.js scene + global camera logic
+│     ├─ Carousel.tsx       # 3D carousel layout & interactions
+│     ├─ SlideCard.tsx      # Slide card mesh (geometry + materials)
+│     └─ SlideContent3D.tsx # 3D slide content rendering (text, tags, effects)
 │
 ├─ components/
-│  ├─ layout/              # Shell, panels, responsive layout
-│  ├─ ui/                  # Buttons, toggles, sliders, accordions
-│  └─ overlays/            # Modals, toasts, Info panel (avatar + links)
+│  ├─ Builder/
+│  │  └─ UserGuide.tsx     # In-app documentation (EN/FA)
+│  ├─ Presentation/
+│  │  ├─ ProgressBar.tsx   # Presentation progress indicator
+│  │  └─ Sidebar.tsx       # Slide list / navigation sidebar
+│  └─ UI/
+│     ├─ Common.tsx        # Shared UI primitives
+│     ├─ ErrorBoundary.tsx # Top-level React error boundary
+│     └─ ThemeToggle.tsx   # Light / dark theme switch
 │
-├─ public/                 # Static assets
-│
-└─ app / pages / main entry
-````
+├─ public/                 # Static assets (icons, sw.js, manifest.webmanifest)
+├─ android-twa/            # Trusted Web Activity (Android) wrapper config
+├─ eslint.config.js        # ESLint flat config
+├─ vite.config.ts          # Vite build config
+└─ .github/workflows/ci.yml # CI: typecheck → lint → test → build
+```
 
 ---
 
@@ -124,8 +142,8 @@ radikal-presenter/
 ### 1. Clone
 
 ```bash
-git clone https://github.com/0xradikal/radikal-presenter.git
-cd radikal-presenter
+git clone https://github.com/0xRadikal/PoWeb-Point.git
+cd PoWeb-Point
 ```
 
 ### 2. Install dependencies
@@ -144,16 +162,26 @@ npm run dev
 ### 4. Production
 
 ```bash
-npm run build
-npm run start
+npm run build      # outputs a static bundle to dist/
+npm run preview    # serve the built dist/ locally to smoke-test
 ```
+
+> This is a static single-page app — the production build in `dist/` can be served
+> by any static host (Cloudflare Pages, Netlify, GitHub Pages, nginx, …). There is
+> no Node server to run.
 
 ### 5. Useful scripts
 
-* `npm run dev` – Dev server with hot reload
-* `npm run build` – Production build
-* `npm run start` – Run built app
-* `npm run lint` – Lint & basic static checks
+* `npm run dev` – Vite dev server with hot reload (http://localhost:3000)
+* `npm run build` – Production build to `dist/`
+* `npm run preview` – Serve the built `dist/` bundle locally
+* `npm run typecheck` – TypeScript type checking (`tsc --noEmit`)
+* `npm run lint` – ESLint over the whole project
+* `npm run lint:strict` – ESLint with `--max-warnings=0`
+* `npm run lint:fix` – ESLint with autofix
+* `npm run test` – Run unit tests once (Vitest)
+* `npm run test:watch` – Run unit tests in watch mode
+* `npm run check` – typecheck + lint + test (used by CI)
 
 ---
 
@@ -255,13 +283,13 @@ Inside the **Builder**:
 
 * **Keyboard navigation**
 
-| Key             | Action                |
-| --------------- | --------------------- |
-| `→`, `PageDown` | Next slide            |
-| `←`, `PageUp`   | Previous slide        |
-| `Home`          | Jump to first slide   |
-| `End`           | Jump to last slide    |
-| `Esc`           | Exit or go back to 3D |
+| Key           | Action                                          |
+| ------------- | ----------------------------------------------- |
+| `→`           | Next slide                                      |
+| `←`           | Previous slide                                  |
+| `Space`       | Next slide (presentation mode)                  |
+| `Enter`       | Enter presentation from 3D / focus mode         |
+| `Esc`         | Exit presentation and return to the 3D overview |
 
 * **Mouse / touch**
 
@@ -417,5 +445,3 @@ You are free to fork, modify, and use Radikal Presenter for your own talks, cour
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&height=140&section=footer&color=0:f97316,50:ec4899,100:6366f1&animation=twinkling" width="100%" alt="footer" />
 </p>
-```
-@radikal1_2006

@@ -62,6 +62,9 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
                      <button onClick={handleReset} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded transition-colors" title={t.reset}>
                         <RefreshCw size={14} />
                     </button>
+                    <button onClick={onShowGuide} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-500" title={t.userGuide}>
+                        <HelpCircle size={14} />
+                    </button>
                     {onClose && (
                         <>
                              <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>

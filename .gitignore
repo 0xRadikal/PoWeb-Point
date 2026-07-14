@@ -15,6 +15,7 @@ dist-ssr
 android-twa/keystore.jks
 android-twa/*.jks
 android-twa/keystore.properties
+android-twa/build
 android-twa/app/build
 android-twa/.gradle
 android-twa/.idea
@@ -38,3 +39,15 @@ android-twa/local.properties
 **/*.keystore
 # Environment variables
 .env
+.dev.vars
+
+# Backup / temp files
+*.bak
+*.orig
+
+# Test / coverage output
+coverage
+.vitest
+
+# Uploaded credentials (never commit)
+upload_files/

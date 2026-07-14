@@ -5,8 +5,35 @@
 import React, { useState, useRef } from 'react';
 import { SLIDE_TYPE_OPTS } from '../../core/constants';
 import { SlideData, Section, CameraConfig, Language } from '../../core/types';
-import { Layout, FileText, Palette, Zap, Box, ChevronUp, ChevronDown, ImageIcon, Upload, Link, Trash2, Sliders, Type, AlignLeft, AlignCenter, AlignRight, PaintBucket, Frame, Droplet, List, Plus, X, Split, Calendar, BarChart, Bold, Italic, Code, Heading1, Heading2, Quote, GripVertical, Images, Users, ArrowRightCircle, MousePointerClick } from 'lucide-react';
-import { Button, DebouncedInput, DebouncedTextarea, Slider, ColorPicker, Select, Label } from '../../components/UI/Common';
+import { Layout, FileText, Palette, Zap, Box, ChevronUp, ChevronDown, ImageIcon, Upload, Link, Trash2, Sliders, Type, AlignLeft, AlignCenter, AlignRight, PaintBucket, Frame, Droplet, List, Plus, X, Split, Calendar, BarChart, Bold, Italic, Code, Heading1, Heading2, Quote, Images, Users, ArrowRightCircle, MousePointerClick } from 'lucide-react';
+import { DebouncedInput, DebouncedTextarea, Slider, ColorPicker, Select, Label } from '../../components/UI/Common';
+
+// Uploaded images are stored inline as base64 data URLs in localStorage. Large
+// files bloat state, blow the ~5MB localStorage quota, and freeze the UI while
+// encoding. Cap the accepted size so users get a clear message instead.
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
+
+// Returns true and shows an alert when the file is not an accepted image
+// (wrong type or too large). Callers should bail out when this returns true.
+const isImageFileRejected = (
+    file: File,
+    t: { invalidImageType?: string; imageTooLarge?: string }
+): boolean => {
+    if (!file.type.startsWith('image/')) {
+        alert(t.invalidImageType || 'Please upload a valid image file.');
+        return true;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        alert(
+            (t.imageTooLarge || 'Image is too large. Maximum size is {max}MB.').replace(
+                '{max}',
+                String(Math.floor(MAX_IMAGE_BYTES / (1024 * 1024)))
+            )
+        );
+        return true;
+    }
+    return false;
+};
 
 // --- Shared Components ---
 
@@ -131,8 +158,8 @@ export const ContentPanel: React.FC<{
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (!file.type.startsWith('image/')) {
-                alert(t.invalidImageType || "Please upload a valid image file.");
+            if (isImageFileRejected(file, t)) {
+                e.target.value = '';
                 return;
             }
 
@@ -471,8 +498,8 @@ const GalleryEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (!file.type.startsWith('image/')) {
-                alert(t.invalidImageType || "Please upload a valid image file.");
+            if (isImageFileRejected(file, t)) {
+                e.target.value = '';
                 return;
             }
 
@@ -533,8 +560,8 @@ const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, d
     const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (!file.type.startsWith('image/')) {
-                alert(t.invalidImageType || "Please upload a valid image file.");
+            if (isImageFileRejected(file, t)) {
+                e.target.value = '';
                 return;
             }
 
@@ -582,9 +609,10 @@ const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, d
 export const ItemsPanel: React.FC<{ 
     activeSlide: SlideData, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
-    saveSnapshot: () => void,
     t: any
-}> = ({ activeSlide, updateSlide, saveSnapshot, t }) => {
+}> = ({ activeSlide, updateSlide, t }) => {
+    // History snapshots are handled by updateSlide(..., true) below, so this
+    // panel does not need a separate saveSnapshot prop.
     
     // Determine editor type
     let editor = null;

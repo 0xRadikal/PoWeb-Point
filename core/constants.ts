@@ -1,6 +1,6 @@
 
 
-import { Section, SlideData, Language, SlideType, CameraConfig } from './types';
+import { Section, SlideData, SlideType, CameraConfig } from './types';
 import { Image as ImageIcon, List, Hash, CalendarClock, SplitSquareHorizontal, LayoutGrid, BarChart3, Megaphone, FileText, Quote, Users, ArrowRightCircle, MousePointerClick, Images } from 'lucide-react';
 
 export const FONTS = {
@@ -133,6 +133,8 @@ export const DICTIONARY = {
     exit: 'Exit Presentation',
     theEnd: 'The End',
     pressEsc: 'Press ESC to exit',
+    noSlides: 'No slide to display',
+    backToDashboard: 'Back to Editor',
     version: 'Radikal v1.0',
     doubleClick: 'Double-click to Present',
     scrollToOverview: 'Scroll to Overview',
@@ -189,6 +191,7 @@ export const DICTIONARY = {
     
     // Error Handling
     invalidImageType: 'Invalid file type. Please upload an image.',
+    imageTooLarge: 'Image is too large. Maximum size is {max}MB.',
     uploadError: 'Failed to read file. Please try again.',
     imageLoadError: 'Failed to load image',
     
@@ -360,6 +363,8 @@ export const DICTIONARY = {
     exit: 'خروج از ارائه',
     theEnd: 'پایان',
     pressEsc: 'برای خروج ESC را بزنید',
+    noSlides: 'اسلایدی برای نمایش وجود ندارد',
+    backToDashboard: 'بازگشت به ویرایشگر',
     version: 'نسخه ۱.۰',
     doubleClick: 'برای ارائه دابل کلیک کنید',
     scrollToOverview: 'اسکرول برای بازگشت به نمای کلی',
@@ -416,6 +421,7 @@ export const DICTIONARY = {
 
     // Error Handling
     invalidImageType: 'فرمت فایل نامعتبر است. لطفاً یک تصویر آپلود کنید.',
+    imageTooLarge: 'حجم تصویر بیش از حد مجاز است. حداکثر اندازه {max} مگابایت است.',
     uploadError: 'خطا در خواندن فایل. لطفاً دوباره تلاش کنید.',
     imageLoadError: 'خطا در بارگذاری تصویر',
 

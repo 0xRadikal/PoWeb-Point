@@ -1,7 +1,8 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { AppState, SlideData, Section, Language, AppContextType, CameraConfig } from './types';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo, useRef } from 'react';
+import { SlideData, Section, Language, AppContextType, CameraConfig } from './types';
 import { SLIDES, SECTIONS, DICTIONARY, DEFAULT_CAMERA_CONFIG } from './constants';
+import { generateId } from './id';
 
 interface HistoryState {
   past: { slides: SlideData[]; sections: Section[]; cameraConfig: CameraConfig }[];
@@ -9,6 +10,10 @@ interface HistoryState {
 }
 
 const MAX_HISTORY_LENGTH = 5000;
+
+// Delay before persisting state to localStorage. Coalesces rapid successive
+// edits (e.g. typing in a text field) into a single write to avoid thrashing.
+const PERSIST_DEBOUNCE_MS = 400;
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -63,28 +68,40 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [builderPreviewMode, setBuilderPreviewMode] = useState<'2d' | '3d'>('2d');
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Debounced persistence: each key is written at most once per
+  // PERSIST_DEBOUNCE_MS after the last change. Pending timers are cleared on
+  // change/unmount so no write fires after the provider is torn down.
   useEffect(() => {
-    try {
+    const handle = setTimeout(() => {
+      try {
         localStorage.setItem('radikal_slides', JSON.stringify(slides));
-    } catch (e) {
+      } catch (e) {
         console.error('Failed to save slides to localStorage', e);
-    }
+      }
+    }, PERSIST_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
   }, [slides]);
 
   useEffect(() => {
-    try {
+    const handle = setTimeout(() => {
+      try {
         localStorage.setItem('radikal_sections', JSON.stringify(sections));
-    } catch (e) {
+      } catch (e) {
         console.error('Failed to save sections to localStorage', e);
-    }
+      }
+    }, PERSIST_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
   }, [sections]);
 
   useEffect(() => {
-    try {
+    const handle = setTimeout(() => {
+      try {
         localStorage.setItem('radikal_camera', JSON.stringify(cameraConfig));
-    } catch (e) {
+      } catch (e) {
         console.error('Failed to save camera config to localStorage', e);
-    }
+      }
+    }, PERSIST_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
   }, [cameraConfig]);
 
   useEffect(() => {
@@ -147,7 +164,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSections(previous.sections);
     setCameraConfigState(previous.cameraConfig);
     if (currentSlideIndex >= previous.slides.length) {
-        setCurrentSlideIndex(previous.slides.length - 1);
+        setCurrentSlideIndex(Math.max(0, previous.slides.length - 1));
     }
   }, [history, currentSlideIndex, slides, sections, cameraConfig]);
 
@@ -166,7 +183,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSlides(next.slides);
     setSections(next.sections);
     setCameraConfigState(next.cameraConfig);
-  }, [history, slides, sections, cameraConfig]);
+    // Keep the active slide index in range after redo (mirrors undo), so a
+    // redo that shrinks the deck cannot leave currentSlideIndex out of bounds.
+    if (currentSlideIndex >= next.slides.length) {
+        setCurrentSlideIndex(Math.max(0, next.slides.length - 1));
+    }
+  }, [history, currentSlideIndex, slides, sections, cameraConfig]);
 
   const resetApp = useCallback(() => {
     saveSnapshot(); 
@@ -189,7 +211,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const addSlide = useCallback((sectionId?: string) => {
     saveSnapshot();
     const newSlide: SlideData = {
-      id: `s-${Date.now()}`,
+      id: generateId('s'),
       sectionId: sectionId || sections[0]?.id || 'default',
       type: 'hero',
       title: DICTIONARY[language].newSlide,
@@ -208,7 +230,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const original = slides[index];
     const newSlide: SlideData = {
         ...original,
-        id: `s-${Date.now()}`,
+        id: generateId('s'),
         title: `${original.title} (Copy)`
     };
     
@@ -251,7 +273,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const addSection = useCallback((title: string) => {
     saveSnapshot();
     const newSection: Section = {
-      id: `sec-${Date.now()}`,
+      id: generateId('sec'),
       title
     };
     setSections(prev => [...prev, newSection]);
@@ -268,12 +290,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSections(prev => prev.filter(s => s.id !== id));
   }, [sections, saveSnapshot]);
 
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const startTransitionToPresentation = useCallback(() => {
       setIsTransitioning(true);
-      setTimeout(() => {
+      if (transitionTimer.current) clearTimeout(transitionTimer.current);
+      transitionTimer.current = setTimeout(() => {
           setMode('presentation');
           setIsTransitioning(false);
+          transitionTimer.current = null;
       }, 1200);
+  }, []);
+
+  // Ensure the pending transition timer never fires after the provider unmounts.
+  useEffect(() => {
+      return () => {
+          if (transitionTimer.current) clearTimeout(transitionTimer.current);
+      };
   }, []);
 
   const value = useMemo(() => ({

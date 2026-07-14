@@ -72,7 +72,6 @@ export const SlideEditor: React.FC<{ onClose?: () => void }> = ({ onClose }) => 
                 key={`items-${activeSlide.id}`}
                 activeSlide={activeSlide} 
                 updateSlide={updateSlide} 
-                saveSnapshot={saveSnapshot} 
                 t={t} 
             />
 
