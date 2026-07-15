@@ -1,5 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, ReactNode, useEffect, useCallback, useMemo, useRef } from 'react';
+import { AppContext } from './AppContext';
 import { SlideData, Section, Language, AppContextType, CameraConfig } from './types';
 import { SLIDES, SECTIONS, DICTIONARY, DEFAULT_CAMERA_CONFIG } from './constants';
 import { generateId } from './id';
@@ -14,8 +15,6 @@ const MAX_HISTORY_LENGTH = 5000;
 // Delay before persisting state to localStorage. Coalesces rapid successive
 // edits (e.g. typing in a text field) into a single write to avoid thrashing.
 const PERSIST_DEBOUNCE_MS = 400;
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Initialize from LocalStorage or Default Constants (Deep Copy to prevent mutation of constants)
@@ -309,7 +308,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       };
   }, []);
 
-  const value = useMemo(() => ({
+  const value = useMemo<AppContextType>(() => ({
       theme,
       mode,
       currentSlideIndex,
@@ -359,12 +358,4 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
 };

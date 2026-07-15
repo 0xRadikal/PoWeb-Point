@@ -1,8 +1,9 @@
 
 import React, { useEffect, useMemo } from 'react';
-import { AnimatePresence, motion as _motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
-import { AppProvider, useApp } from './core/store';
+import { AppProvider } from './core/store';
+import { useApp } from './core/AppContext';
 import { DashboardScene } from './modules/three/Scene';
 import { SlideViewer } from './modules/presentation/SlideViewer';
 import { ProgressBar } from './components/Presentation/ProgressBar';
@@ -10,8 +11,6 @@ import { Sidebar } from './components/Presentation/Sidebar';
 import { ThemeToggle } from './components/UI/ThemeToggle';
 import { BuilderPanel } from './modules/builder/Builder';
 import { Edit3, Info, Github, ExternalLink, Twitter, Send } from 'lucide-react';
-
-const motion = _motion as any;
 
 // --- Dashboard Overlay Components ---
 const CreatorInfo: React.FC = () => {
@@ -36,6 +35,8 @@ const CreatorInfo: React.FC = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
+                        role="dialog"
+                        aria-label={t.a11yShowInfo}
                         className={`bg-black/60 backdrop-blur-xl border border-white/10 p-4 md:p-5 rounded-2xl shadow-2xl w-64 mb-2 ${isRtl ? 'md:text-right text-left' : 'text-left'}`}
                     >
                         <div className={`flex items-center gap-3 mb-4 border-b border-white/10 pb-3 ${isRtl ? 'md:flex-row-reverse flex-row' : 'flex-row'}`}>
@@ -54,19 +55,19 @@ const CreatorInfo: React.FC = () => {
                         </div>
                         <div className="space-y-2" dir="ltr">
                             <a href="https://github.com/0xradikal" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors group">
-                                <Github size={16} className="group-hover:text-white transition-colors" />
+                                <Github size={16} className="group-hover:text-white transition-colors" aria-hidden="true" />
                                 <span className="text-xs font-medium">{t.github}</span>
-                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" />
+                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
                             </a>
                             <a href="https://x.com/0xRadikal" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors group">
-                                <Twitter size={16} className="group-hover:text-white transition-colors" />
+                                <Twitter size={16} className="group-hover:text-white transition-colors" aria-hidden="true" />
                                 <span className="text-xs font-medium">{t.twitter}</span>
-                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" />
+                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
                             </a>
                             <a href="https://t.me/OxRadikal" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors group">
-                                <Send size={16} className="group-hover:text-white transition-colors" />
+                                <Send size={16} className="group-hover:text-white transition-colors" aria-hidden="true" />
                                 <span className="text-xs font-medium">{t.telegram}</span>
-                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" />
+                                <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-50" aria-hidden="true" />
                             </a>
                         </div>
                     </motion.div>
@@ -76,9 +77,13 @@ const CreatorInfo: React.FC = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label={t.a11yShowInfo}
+                aria-expanded={isOpen}
+                aria-haspopup="dialog"
+                title={t.a11yShowInfo}
                 className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-lg border backdrop-blur-md transition-all duration-300 ${isOpen ? 'bg-white text-black border-white' : 'bg-black/30 text-white border-white/20 hover:bg-black/50'}`}
             >
-                <Info size={20} className="md:w-6 md:h-6" strokeWidth={isOpen ? 2.5 : 2} />
+                <Info size={20} className="md:w-6 md:h-6" strokeWidth={isOpen ? 2.5 : 2} aria-hidden="true" />
             </motion.button>
         </div>
     );
@@ -111,11 +116,13 @@ const DashboardUI: React.FC = () => {
 };
 
 const LanguageToggle = () => {
-    const { language, setLanguage, isTransitioning } = useApp();
+    const { language, setLanguage, isTransitioning, t } = useApp();
     if (isTransitioning) return null;
     return (
         <button
             onClick={() => setLanguage(language === 'en' ? 'fa' : 'en')}
+            aria-label={t.a11yToggleLanguage}
+            title={t.a11yToggleLanguage}
             className="fixed top-4 md:top-8 z-50 p-2 md:p-3 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur border border-slate-200/50 dark:border-white/10 text-slate-800 dark:text-white hover:scale-110 transition-all active:scale-95 font-bold text-xs md:text-sm ltr:left-14 md:ltr:left-20 rtl:right-14 md:rtl:right-20 pointer-events-auto shadow-sm"
         >
             {language === 'en' ? 'FA' : 'EN'}
@@ -124,7 +131,7 @@ const LanguageToggle = () => {
 };
 
 const EditToggle = () => {
-    const { mode, setMode, isTransitioning } = useApp();
+    const { mode, setMode, isTransitioning, t } = useApp();
     
     // Only show in dashboard mode. Hidden in builder and presentation.
     // In presentation mode, access is provided via the Sidebar menu.
@@ -133,10 +140,11 @@ const EditToggle = () => {
     return (
         <button
             onClick={() => setMode('builder')}
+            aria-label={t.a11yEnterBuilder}
             className="fixed top-4 md:top-8 z-50 p-2 md:p-3 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur border border-slate-200/50 dark:border-white/10 text-slate-800 dark:text-white hover:scale-110 transition-all active:scale-95 pointer-events-auto shadow-sm ltr:right-4 md:ltr:right-20 rtl:left-4 md:rtl:left-20"
-            title="Edit Presentation"
+            title={t.a11yEnterBuilder}
         >
-            <Edit3 size={20} />
+            <Edit3 size={20} aria-hidden="true" />
         </button>
     );
 }
@@ -194,7 +202,7 @@ const AppContent: React.FC = () => {
                         <BuilderPanel />
                     </motion.div>
                 ) : mode === 'dashboard' ? (
-                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, duration: 1 }} className="w-full h-full">
+                <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }} className="w-full h-full">
                     <DashboardUI />
                     <div className="absolute bottom-8 md:bottom-12 ltr:left-4 md:ltr:right-12 ltr:right-auto md:ltr:left-auto rtl:right-4 md:rtl:left-12 rtl:left-auto md:rtl:right-auto z-20 pointer-events-none">
                         <button onClick={() => { setCurrentSlideIndex(0); startTransitionToPresentation(); }} className="bg-white/80 dark:bg-black/40 hover:bg-white backdrop-blur-xl text-slate-900 dark:text-white px-6 md:px-8 py-3 md:py-3 rounded-2xl border border-white/20 shadow-2xl text-base md:text-lg font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3 pointer-events-auto">

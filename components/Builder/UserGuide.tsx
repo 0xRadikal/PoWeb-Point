@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
+import type { Translation } from '../../core/constants';
+import type { LucideIcon } from 'lucide-react';
 import { 
     X, Layout, Type, Image as ImageIcon, Box, Sliders, Settings, 
     BookOpen, MousePointerClick, Keyboard, 
@@ -20,6 +22,9 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState('start');
     const isRtl = language === 'fa';
     const navRef = useRef<HTMLDivElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const previouslyFocused = useRef<HTMLElement | null>(null);
 
     const TAB_DATA = [
         { id: 'start', icon: BookOpen, label: t.guideTabBasics },
@@ -40,6 +45,48 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
         }
     }, [activeTab, isOpen]);
 
+    // Modal a11y: Escape to close, focus trap, and focus restore on close.
+    useEffect(() => {
+        if (!isOpen) return;
+
+        previouslyFocused.current = document.activeElement as HTMLElement | null;
+        // Move focus into the dialog when it opens.
+        closeButtonRef.current?.focus();
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                onClose();
+                return;
+            }
+            if (e.key === 'Tab' && dialogRef.current) {
+                const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const visible = Array.from(focusable).filter(
+                    (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
+                );
+                if (visible.length === 0) return;
+                const first = visible[0];
+                const last = visible[visible.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, true);
+            // Restore focus to the trigger when the dialog closes.
+            previouslyFocused.current?.focus?.();
+        };
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     return (
@@ -50,10 +97,16 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                     animate={{ opacity: 1 }} 
                     exit={{ opacity: 0 }}
                     onClick={onClose}
+                    aria-hidden="true"
                     className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                 />
                 
                 <motion.div 
+                    ref={dialogRef}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="user-guide-title"
+                    aria-describedby="user-guide-intro"
                     initial={{ y: '100%', opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: '100%', opacity: 0 }}
@@ -65,18 +118,21 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                     <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
                         <div className="flex items-center gap-3 md:gap-4">
                             <div className="bg-blue-600 text-white p-2 md:p-2.5 rounded-xl shadow-lg shadow-blue-500/20 shrink-0">
-                                <BookOpen size={20} className="md:w-6 md:h-6" />
+                                <BookOpen size={20} className="md:w-6 md:h-6" aria-hidden="true" />
                             </div>
                             <div>
-                                <h2 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">{t.userGuide}</h2>
-                                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{t.guideIntro}</p>
+                                <h2 id="user-guide-title" className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">{t.userGuide}</h2>
+                                <p id="user-guide-intro" className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{t.guideIntro}</p>
                             </div>
                         </div>
                         <button 
+                            ref={closeButtonRef}
                             onClick={onClose} 
+                            aria-label={t.a11yClose}
+                            title={t.a11yClose}
                             className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500 dark:text-slate-400"
                         >
-                            <X size={24} />
+                            <X size={24} aria-hidden="true" />
                         </button>
                     </div>
 
@@ -84,6 +140,8 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                     <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
                         {/* Responsive Sidebar Navigation */}
                         <div 
+                            role="tablist"
+                            aria-label={t.userGuide}
                             className="w-full md:w-72 bg-white dark:bg-slate-900/50 border-b md:border-b-0 md:border-r rtl:border-l border-slate-200 dark:border-slate-800 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto shrink-0 no-scrollbar md:p-2"
                             ref={navRef}
                         >
@@ -91,6 +149,10 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                                 <button
                                     key={tab.id}
                                     data-tab={tab.id}
+                                    role="tab"
+                                    id={`guide-tab-${tab.id}`}
+                                    aria-selected={activeTab === tab.id}
+                                    aria-controls="guide-tabpanel"
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`
                                         flex items-center gap-3 p-3 md:p-4 md:rounded-xl transition-all text-start relative shrink-0
@@ -101,7 +163,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                                         }
                                     `}
                                 >
-                                    <tab.icon size={18} className={`shrink-0 ${activeTab === tab.id ? 'text-blue-500' : 'text-slate-400'}`} />
+                                    <tab.icon size={18} className={`shrink-0 ${activeTab === tab.id ? 'text-blue-500' : 'text-slate-400'}`} aria-hidden="true" />
                                     <div className="font-bold text-sm leading-tight">{tab.label}</div>
                                     {/* Desktop Active Indicator */}
                                     {activeTab === tab.id && (
@@ -112,7 +174,13 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
                         </div>
 
                         {/* Content Area */}
-                        <div className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-slate-950 p-4 md:p-8 lg:p-12 scroll-smooth">
+                        <div
+                            id="guide-tabpanel"
+                            role="tabpanel"
+                            aria-labelledby={`guide-tab-${activeTab}`}
+                            tabIndex={0}
+                            className="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-slate-950 p-4 md:p-8 lg:p-12 scroll-smooth"
+                        >
                             <div className="max-w-4xl mx-auto min-h-full pb-10">
                                 {activeTab === 'start' && <GettingStartedGuide t={t} />}
                                 {activeTab === 'types' && <SlideTypesGuide t={t} />}
@@ -131,9 +199,9 @@ export const UserGuide: React.FC<UserGuideProps> = ({ isOpen, onClose }) => {
 
 // --- Sub-Components ---
 
-const SectionTitle: React.FC<{ children: React.ReactNode; icon?: any }> = ({ children, icon: Icon }) => (
+const SectionTitle: React.FC<{ children: React.ReactNode; icon?: LucideIcon }> = ({ children, icon: Icon }) => (
     <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
-        {Icon && <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><Icon size={24} /></div>}
+        {Icon && <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><Icon size={24} aria-hidden="true" /></div>}
         <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{children}</h3>
     </div>
 );
@@ -141,7 +209,7 @@ const SectionTitle: React.FC<{ children: React.ReactNode; icon?: any }> = ({ chi
 const FeatureBlock: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className = '' }) => (
     <div className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
         <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2 text-base">
-            <CheckCircle2 size={16} className="text-blue-500" />
+            <CheckCircle2 size={16} className="text-blue-500" aria-hidden="true" />
             {title}
         </h4>
         <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-2 pl-6">
@@ -152,7 +220,7 @@ const FeatureBlock: React.FC<{ title: string; children: React.ReactNode; classNa
 
 // --- 1. Getting Started ---
 
-const GettingStartedGuide: React.FC<{ t: any }> = ({ t }) => (
+const GettingStartedGuide: React.FC<{ t: Translation }> = ({ t }) => (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <SectionTitle icon={BookOpen}>{t.welcomeTitle}</SectionTitle>
         <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -170,7 +238,7 @@ const GettingStartedGuide: React.FC<{ t: any }> = ({ t }) => (
 
         <div className="bg-slate-100 dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2 mb-4">
-                <Keyboard className="text-blue-500" size={20} />
+                <Keyboard className="text-blue-500" size={20} aria-hidden="true" />
                 <h4 className="font-bold text-slate-900 dark:text-white">{t.shortcuts}</h4>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -192,7 +260,7 @@ const GettingStartedGuide: React.FC<{ t: any }> = ({ t }) => (
 
 // --- 2. Slide Types ---
 
-const SlideTypesGuide: React.FC<{ t: any }> = ({ t }) => {
+const SlideTypesGuide: React.FC<{ t: Translation }> = ({ t }) => {
     const types = [
         { icon: Megaphone, labelKey: "typeHero" },
         { icon: FileText, labelKey: "typeArticle" },
@@ -221,7 +289,7 @@ const SlideTypesGuide: React.FC<{ t: any }> = ({ t }) => {
                 {types.map((type, i) => (
                     <div key={i} className="flex gap-3 p-3 md:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors group">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 group-hover:text-blue-500 transition-colors">
-                            <type.icon size={20} className="md:w-6 md:h-6" />
+                            <type.icon size={20} className="md:w-6 md:h-6" aria-hidden="true" />
                         </div>
                         <div className="flex items-center">
                             <h4 className="font-bold text-sm md:text-base text-slate-900 dark:text-white">{t[type.labelKey]}</h4>
@@ -235,7 +303,7 @@ const SlideTypesGuide: React.FC<{ t: any }> = ({ t }) => {
 
 // --- 3. Editor Workflow ---
 
-const EditorWorkflowGuide: React.FC<{ t: any }> = ({ t }) => (
+const EditorWorkflowGuide: React.FC<{ t: Translation }> = ({ t }) => (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <SectionTitle icon={Sliders}>{t.guideTabBuilder}</SectionTitle>
         <div className="grid grid-cols-1 gap-6">
@@ -246,7 +314,7 @@ const EditorWorkflowGuide: React.FC<{ t: any }> = ({ t }) => (
             <FeatureBlock title={t.builderIntro2}>
                 {t.builderDesc2}
                 <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30 text-sm flex gap-3">
-                    <FileText className="shrink-0 text-blue-500" size={18} />
+                    <FileText className="shrink-0 text-blue-500" size={18} aria-hidden="true" />
                     <div>
                         <strong className="block mb-1 text-blue-900 dark:text-blue-200">Markdown Supported</strong>
                         <p className="text-blue-800 dark:text-blue-300 text-xs" dir="ltr">
@@ -265,7 +333,7 @@ const EditorWorkflowGuide: React.FC<{ t: any }> = ({ t }) => (
 
 // --- 4. Design System ---
 
-const DesignSystemGuide: React.FC<{ t: any }> = ({ t }) => (
+const DesignSystemGuide: React.FC<{ t: Translation }> = ({ t }) => (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <SectionTitle icon={Type}>{t.guideTabDesign}</SectionTitle>
         
@@ -289,7 +357,7 @@ const DesignSystemGuide: React.FC<{ t: any }> = ({ t }) => (
 
 // --- 5. 3D Engine ---
 
-const Engine3DGuide: React.FC<{ t: any }> = ({ t }) => (
+const Engine3DGuide: React.FC<{ t: Translation }> = ({ t }) => (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <SectionTitle icon={Box}>{t.guideTab3D}</SectionTitle>
 
@@ -321,7 +389,7 @@ const Engine3DGuide: React.FC<{ t: any }> = ({ t }) => (
 
 // --- 6. Advanced ---
 
-const AdvancedGuide: React.FC<{ t: any }> = ({ t }) => {
+const AdvancedGuide: React.FC<{ t: Translation }> = ({ t }) => {
     const { resetApp } = useApp();
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -338,7 +406,7 @@ const AdvancedGuide: React.FC<{ t: any }> = ({ t }) => {
 
                 <div className="p-5 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30">
                     <h4 className="font-bold text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
-                        <AlertCircle size={18} /> {t.factoryReset}
+                        <AlertCircle size={18} aria-hidden="true" /> {t.factoryReset}
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                         {t.factoryResetDesc}

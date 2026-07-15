@@ -123,6 +123,8 @@ export const Slider: React.FC<{
             value={value} 
             onPointerDown={onPointerDown} 
             onChange={(e) => onChange(parseFloat(e.target.value))} 
+            aria-label={label}
+            aria-valuetext={displayValue}
             className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500" 
         />
     </div>
@@ -142,6 +144,7 @@ export const ColorPicker: React.FC<{
                 value={value} 
                 onFocus={onFocus} 
                 onChange={(e) => onChange(e.target.value)} 
+                aria-label={label}
                 className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer p-0 border-0" 
             />
         </div>
@@ -164,7 +167,7 @@ export const Select: React.FC<{
             >
                 {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" aria-hidden="true" />
         </div>
     </label>
 );

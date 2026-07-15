@@ -1,12 +1,10 @@
 
 import React, { useState } from 'react';
-import { motion as _motion } from 'framer-motion';
-import { useApp } from '../../core/store';
-
-const motion = _motion as any;
+import { motion } from 'framer-motion';
+import { useApp } from '../../core/AppContext';
 
 export const ProgressBar: React.FC = () => {
-  const { slides, currentSlideIndex, goToSlide } = useApp();
+  const { slides, currentSlideIndex, goToSlide, t } = useApp();
   const [hovered, setHovered] = useState(false);
 
   const progress = ((currentSlideIndex + 1) / slides.length) * 100;
@@ -17,7 +15,14 @@ export const ProgressBar: React.FC = () => {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
     >
-        <div className="w-full h-1.5 md:h-1 bg-slate-200 dark:bg-slate-800 relative">
+        <div
+            className="w-full h-1.5 md:h-1 bg-slate-200 dark:bg-slate-800 relative"
+            role="progressbar"
+            aria-label={t.a11yProgress}
+            aria-valuenow={currentSlideIndex + 1}
+            aria-valuemin={1}
+            aria-valuemax={slides.length}
+        >
             <motion.div 
                 className="absolute top-0 left-0 h-full bg-blue-500"
                 initial={{ width: 0 }}
@@ -42,6 +47,8 @@ export const ProgressBar: React.FC = () => {
                         <button
                             key={idx}
                             onClick={() => goToSlide(idx)}
+                            aria-label={`${t.slide} ${idx + 1}`}
+                            aria-current={idx === currentSlideIndex ? 'true' : undefined}
                             className={`h-full w-1.5 md:w-2 rounded-full transition-all duration-300 ${
                                 idx <= currentSlideIndex 
                                 ? 'bg-blue-500 hover:bg-blue-400' 
@@ -49,7 +56,7 @@ export const ProgressBar: React.FC = () => {
                             } ${
                                 idx === currentSlideIndex ? 'w-3 md:w-4' : 'w-1.5 md:w-2'
                             }`}
-                            title={`Go to slide ${idx + 1}`}
+                            title={`${t.slide} ${idx + 1}`}
                         />
                     ))}
                 </div>

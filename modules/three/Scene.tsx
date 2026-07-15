@@ -3,7 +3,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Environment, ContactShadows, Sparkles, Stars } from '@react-three/drei';
 import * as THREE from 'three';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
 import { CarouselRing } from './Carousel';
 import { CameraConfig } from '../../core/types';
 
@@ -20,9 +20,10 @@ export const RendererCleanup = () => {
                      if (object.material) {
                          const cleanMaterial = (material: THREE.Material) => {
                              // Dispose textures
+                             const materialRecord = material as unknown as Record<string, unknown>;
                              for (const key of Object.keys(material)) {
-                                 const value = (material as any)[key];
-                                 if (value && typeof value === 'object' && 'isTexture' in value && value.isTexture) {
+                                 const value = materialRecord[key];
+                                 if (value instanceof THREE.Texture) {
                                      value.dispose();
                                  }
                              }
@@ -45,8 +46,12 @@ export const RendererCleanup = () => {
     return null;
 }
 
+// drei's <Stars> forwards a THREE.Points and augments it with a mutable
+// `speed` uniform driver that the component reads each frame.
+type StarsRef = THREE.Points & { speed: number };
+
 const WarpEffect = ({ isTransitioning }: { isTransitioning: boolean }) => {
-    const starsRef = useRef<any>(null);
+    const starsRef = useRef<StarsRef>(null);
     
     useFrame((_, delta) => {
         if (starsRef.current) {

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
 import { SLIDE_TYPE_OPTS } from '../../core/constants';
 import { Trash2, Plus, Copy, Undo, Redo, RefreshCw, ChevronUp, ChevronDown, HelpCircle, Layers, PanelLeftClose, X, Folder } from 'lucide-react';
 
@@ -48,29 +48,29 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
             {/* Header */}
             <div className="p-4 md:py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex justify-between items-center shrink-0 h-14 md:h-auto">
                 <div className="flex items-center gap-2">
-                     <Layers size={16} className="text-blue-500" />
+                     <Layers size={16} className="text-blue-500" aria-hidden="true" />
                      <h2 className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">{t.outline}</h2>
                 </div>
                 <div className="flex gap-1 items-center">
-                    <button onClick={undo} disabled={!canUndo} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded disabled:opacity-30 transition-colors text-slate-600 dark:text-slate-300" title={t.undo}>
-                        <Undo size={14} />
+                    <button onClick={undo} disabled={!canUndo} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded disabled:opacity-30 transition-colors text-slate-600 dark:text-slate-300" title={t.undo} aria-label={t.undo}>
+                        <Undo size={14} aria-hidden="true" />
                     </button>
-                    <button onClick={redo} disabled={!canRedo} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded disabled:opacity-30 transition-colors text-slate-600 dark:text-slate-300" title={t.redo}>
-                        <Redo size={14} />
+                    <button onClick={redo} disabled={!canRedo} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded disabled:opacity-30 transition-colors text-slate-600 dark:text-slate-300" title={t.redo} aria-label={t.redo}>
+                        <Redo size={14} aria-hidden="true" />
                     </button>
                     <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
-                     <button onClick={handleReset} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded transition-colors" title={t.reset}>
-                        <RefreshCw size={14} />
+                     <button onClick={handleReset} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded transition-colors" title={t.reset} aria-label={t.reset}>
+                        <RefreshCw size={14} aria-hidden="true" />
                     </button>
-                    <button onClick={onShowGuide} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-500" title={t.userGuide}>
-                        <HelpCircle size={14} />
+                    <button onClick={onShowGuide} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors text-slate-500 dark:text-slate-400 hover:text-blue-500" title={t.userGuide} aria-label={t.userGuide}>
+                        <HelpCircle size={14} aria-hidden="true" />
                     </button>
                     {onClose && (
                         <>
                              <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
-                             <button onClick={onClose} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-700" title="Close Panel">
-                                <span className="md:hidden"><X size={16} /></span>
-                                <span className="hidden md:inline"><PanelLeftClose size={14} /></span>
+                             <button onClick={onClose} className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-700" title={t.a11yCloseMenu} aria-label={t.a11yCloseMenu}>
+                                <span className="md:hidden"><X size={16} aria-hidden="true" /></span>
+                                <span className="hidden md:inline"><PanelLeftClose size={14} aria-hidden="true" /></span>
                             </button>
                         </>
                     )}
@@ -89,13 +89,15 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
                             <div className="flex items-center group mb-2">
                                 <button 
                                     onClick={() => toggleSection(section.id)}
+                                    aria-expanded={!isCollapsed}
+                                    aria-label={section.title}
                                     className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                                 >
-                                    {isCollapsed ? <ChevronUp size={12} className="rotate-90" /> : <ChevronDown size={12} />}
+                                    {isCollapsed ? <ChevronUp size={12} className="rotate-90" aria-hidden="true" /> : <ChevronDown size={12} aria-hidden="true" />}
                                 </button>
                                 
                                 <div className="flex-1 flex items-center gap-2 px-1 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => toggleSection(section.id)}>
-                                    <Folder size={14} className="text-slate-400 dark:text-slate-500" />
+                                    <Folder size={14} className="text-slate-400 dark:text-slate-500" aria-hidden="true" />
                                     <span className="font-bold text-xs text-slate-700 dark:text-slate-300 truncate">{section.title}</span>
                                     <span className="text-[10px] text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 rounded-full">{sectionSlides.length}</span>
                                 </div>
@@ -105,15 +107,17 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
                                         onClick={() => addSlide(section.id)} 
                                         className="p-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-400 hover:text-blue-500 rounded"
                                         title={t.addSlide}
+                                        aria-label={t.addSlide}
                                     >
-                                        <Plus size={12} />
+                                        <Plus size={12} aria-hidden="true" />
                                     </button>
                                      <button 
                                         onClick={() => deleteSection(section.id)} 
                                         className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 rounded ml-1"
                                         title={t.delete}
+                                        aria-label={t.delete}
                                     >
-                                        <Trash2 size={12} />
+                                        <Trash2 size={12} aria-hidden="true" />
                                     </button>
                                 </div>
                             </div>
@@ -151,14 +155,14 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
                                                     
                                                     {isActive && (
                                                         <div className="flex items-center animate-in fade-in zoom-in duration-200 bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded px-1 absolute ltr:right-2 rtl:left-2 shadow-sm border border-slate-100 dark:border-slate-800">
-                                                            <button onClick={(e) => { e.stopPropagation(); duplicateSlide(slide.id); }} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-blue-500">
-                                                                <Copy size={12} />
+                                                            <button onClick={(e) => { e.stopPropagation(); duplicateSlide(slide.id); }} title={t.duplicate} aria-label={t.duplicate} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-blue-500">
+                                                                <Copy size={12} aria-hidden="true" />
                                                             </button>
-                                                             <button onClick={(e) => { e.stopPropagation(); handleMove('up'); }} disabled={globalIndex === 0} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded disabled:opacity-30 text-slate-400">
-                                                                <ChevronUp size={12} />
+                                                             <button onClick={(e) => { e.stopPropagation(); handleMove('up'); }} disabled={globalIndex === 0} title={t.moveUp} aria-label={t.moveUp} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded disabled:opacity-30 text-slate-400">
+                                                                <ChevronUp size={12} aria-hidden="true" />
                                                             </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); handleMove('down'); }} disabled={globalIndex === slides.length - 1} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded disabled:opacity-30 text-slate-400">
-                                                                <ChevronDown size={12} />
+                                                            <button onClick={(e) => { e.stopPropagation(); handleMove('down'); }} disabled={globalIndex === slides.length - 1} title={t.moveDown} aria-label={t.moveDown} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded disabled:opacity-30 text-slate-400">
+                                                                <ChevronDown size={12} aria-hidden="true" />
                                                             </button>
                                                         </div>
                                                     )}
@@ -187,8 +191,10 @@ export const SlideManager: React.FC<{ onShowGuide: () => void; onClose?: () => v
                      <button 
                         onClick={() => { if (newSectionName.trim()) { addSection(newSectionName); setNewSectionName(''); } }}
                         className="px-3 bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-600 dark:text-slate-400 rounded-lg transition-colors"
+                        title={t.addSection}
+                        aria-label={t.addSection}
                      >
-                         <Plus size={18} />
+                         <Plus size={18} aria-hidden="true" />
                      </button>
                  </div>
              </div>

@@ -1,14 +1,12 @@
 
 
 import React from 'react';
-import { motion as _motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
 import { SlideData } from '../../core/types';
 import { SlideRenderer } from './SlideRenderer';
-import { getStyleClasses, getPatternStyle } from './SlideTemplates';
-
-const motion = _motion as any;
+import { getStyleClasses, getPatternStyle } from './slideStyleUtils';
 
 interface SlideViewerProps {
     slide: SlideData;
@@ -101,13 +99,14 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({ slide, isPreview = fal
 
         {/* --- Navigation Controls (Hidden in Builder Preview) --- */}
         {!isPreview && (
-            <div className="absolute bottom-8 ltr:right-8 rtl:left-8 z-50 flex items-center gap-4">
+            <nav aria-label={t.a11yNavigation} className="absolute bottom-8 ltr:right-8 rtl:left-8 z-50 flex items-center gap-4">
                 <button 
                     onClick={prevSlide}
+                    aria-label={t.a11yPreviousSlide}
                     className="p-4 rounded-full bg-white/10 hover:bg-white/20 dark:bg-black/20 dark:hover:bg-black/40 backdrop-blur-md border border-slate-200/20 dark:border-white/10 text-slate-700 dark:text-white transition-all hover:scale-110 active:scale-95 group"
                 >
-                    <ArrowLeft size={24} className="ltr:block rtl:hidden" />
-                    <ArrowRight size={24} className="ltr:hidden rtl:block" />
+                    <ArrowLeft size={24} className="ltr:block rtl:hidden" aria-hidden="true" />
+                    <ArrowRight size={24} className="ltr:hidden rtl:block" aria-hidden="true" />
                 </button>
 
                 {isLastSlide ? (
@@ -116,18 +115,19 @@ export const SlideViewer: React.FC<SlideViewerProps> = ({ slide, isPreview = fal
                         className="flex items-center gap-2 px-6 py-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 font-bold tracking-wide"
                     >
                         <span>{t.theEnd}</span>
-                        <CheckCircle size={20} />
+                        <CheckCircle size={20} aria-hidden="true" />
                     </button>
                 ) : (
                     <button 
                         onClick={nextSlide}
+                        aria-label={t.a11yNextSlide}
                         className="p-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30 transition-all hover:scale-110 active:scale-95 group"
                     >
-                        <ArrowRight size={24} className="ltr:block rtl:hidden" />
-                        <ArrowLeft size={24} className="ltr:hidden rtl:block" />
+                        <ArrowRight size={24} className="ltr:block rtl:hidden" aria-hidden="true" />
+                        <ArrowLeft size={24} className="ltr:hidden rtl:block" aria-hidden="true" />
                     </button>
                 )}
-            </div>
+            </nav>
         )}
     </div>
   );

@@ -4,7 +4,9 @@
 
 import React, { useState, useRef } from 'react';
 import { SLIDE_TYPE_OPTS } from '../../core/constants';
-import { SlideData, Section, CameraConfig, Language } from '../../core/types';
+import type { Translation } from '../../core/constants';
+import { SlideData, Section, CameraConfig, Language, SlideMetadataValue, TeamMember } from '../../core/types';
+import type { LucideIcon } from 'lucide-react';
 import { Layout, FileText, Palette, Zap, Box, ChevronUp, ChevronDown, ImageIcon, Upload, Link, Trash2, Sliders, Type, AlignLeft, AlignCenter, AlignRight, PaintBucket, Frame, Droplet, List, Plus, X, Split, Calendar, BarChart, Bold, Italic, Code, Heading1, Heading2, Quote, Images, Users, ArrowRightCircle, MousePointerClick } from 'lucide-react';
 import { DebouncedInput, DebouncedTextarea, Slider, ColorPicker, Select, Label } from '../../components/UI/Common';
 
@@ -37,12 +39,13 @@ const isImageFileRejected = (
 
 // --- Shared Components ---
 
-const Panel: React.FC<{ title: string; icon: any; children: React.ReactNode; defaultOpen?: boolean; className?: string }> = ({ title, icon: Icon, children, defaultOpen = false, className = "" }) => {
+const Panel: React.FC<{ title: string; icon: LucideIcon; children: React.ReactNode; defaultOpen?: boolean; className?: string }> = ({ title, icon: Icon, children, defaultOpen = false, className = "" }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
         <div className={`border-b border-slate-100 dark:border-slate-800 last:border-0 ${className}`}>
             <button 
                 onClick={() => setIsOpen(!isOpen)} 
+                aria-expanded={isOpen}
                 className={`w-full flex items-center justify-between p-4 md:py-3 transition-colors ${
                     isOpen 
                     ? 'bg-slate-50 dark:bg-slate-900/50' 
@@ -50,9 +53,9 @@ const Panel: React.FC<{ title: string; icon: any; children: React.ReactNode; def
                 }`}
             >
                 <div className="flex items-center gap-3 font-bold text-xs text-slate-700 dark:text-slate-200 uppercase tracking-wide">
-                    <Icon size={16} className={`${isOpen ? 'text-blue-500' : 'text-slate-400'}`} /> {title}
+                    <Icon size={16} className={`${isOpen ? 'text-blue-500' : 'text-slate-400'}`} aria-hidden="true" /> {title}
                 </div>
-                {isOpen ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                {isOpen ? <ChevronUp size={16} className="text-slate-400" aria-hidden="true" /> : <ChevronDown size={16} className="text-slate-400" aria-hidden="true" />}
             </button>
             {isOpen && (
                 <div className="p-4 md:p-5 bg-white dark:bg-slate-950 animate-in slide-in-from-top-1 space-y-5">
@@ -63,17 +66,17 @@ const Panel: React.FC<{ title: string; icon: any; children: React.ReactNode; def
     );
 };
 
-const MarkdownToolbar: React.FC<{ onInsert: (prefix: string, suffix?: string) => void, t: any }> = ({ onInsert, t }) => {
+const MarkdownToolbar: React.FC<{ onInsert: (prefix: string, suffix?: string) => void, t: Translation }> = ({ onInsert, t }) => {
     return (
         <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-t-lg border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar">
-            <button onClick={() => onInsert('**', '**')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.bold}><Bold size={14} /></button>
-            <button onClick={() => onInsert('*', '*')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.italic}><Italic size={14} /></button>
-            <button onClick={() => onInsert('# ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.heading1}><Heading1 size={14} /></button>
-            <button onClick={() => onInsert('## ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.heading2}><Heading2 size={14} /></button>
+            <button onClick={() => onInsert('**', '**')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.bold} aria-label={t.bold}><Bold size={14} aria-hidden="true" /></button>
+            <button onClick={() => onInsert('*', '*')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.italic} aria-label={t.italic}><Italic size={14} aria-hidden="true" /></button>
+            <button onClick={() => onInsert('# ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.heading1} aria-label={t.heading1}><Heading1 size={14} aria-hidden="true" /></button>
+            <button onClick={() => onInsert('## ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.heading2} aria-label={t.heading2}><Heading2 size={14} aria-hidden="true" /></button>
             <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
-            <button onClick={() => onInsert('- ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.listItems}><List size={14} /></button>
-            <button onClick={() => onInsert('> ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.quote}><Quote size={14} /></button>
-            <button onClick={() => onInsert('`', '`')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.code}><Code size={14} /></button>
+            <button onClick={() => onInsert('- ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.listItems} aria-label={t.listItems}><List size={14} aria-hidden="true" /></button>
+            <button onClick={() => onInsert('> ')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.quote} aria-label={t.quote}><Quote size={14} aria-hidden="true" /></button>
+            <button onClick={() => onInsert('`', '`')} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 hover:text-blue-500 transition-colors" title={t.code} aria-label={t.code}><Code size={14} aria-hidden="true" /></button>
         </div>
     );
 };
@@ -85,7 +88,7 @@ export const GeneralPanel: React.FC<{
     sections: Section[], 
     isRtl: boolean, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
-    t: any
+    t: Translation
 }> = ({ activeSlide, sections, isRtl, updateSlide, t }) => (
     <Panel title={t.generalInfo} icon={Layout} defaultOpen={false}>
         <Select 
@@ -108,7 +111,7 @@ export const GeneralPanel: React.FC<{
                         }`}
                         title={t[typeObj.labelKey]}
                     >
-                        <typeObj.icon size={20} className={`mb-1.5 ${isRtl && typeObj.type === 'list' ? 'scale-x-[-1]' : ''}`} />
+                        <typeObj.icon size={20} className={`mb-1.5 ${isRtl && typeObj.type === 'list' ? 'scale-x-[-1]' : ''}`} aria-hidden="true" />
                         <span className="text-[9px] font-bold text-center leading-none opacity-90">{t[typeObj.labelKey]}</span>
                     </button>
                 ))}
@@ -121,7 +124,7 @@ export const ContentPanel: React.FC<{
     activeSlide: SlideData, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
     saveSnapshot: () => void,
-    t: any
+    t: Translation
 }> = ({ activeSlide, updateSlide, saveSnapshot, t }) => {
     const [imageTab, setImageTab] = useState<'upload' | 'url'>('upload');
     const [showImageSettings, setShowImageSettings] = useState(false);
@@ -261,10 +264,13 @@ export const ContentPanel: React.FC<{
                 {showImageToggle && (
                     <div className="flex items-center justify-between py-3 border-t border-slate-100 dark:border-slate-800 mt-2">
                         <Label className="mb-0 flex items-center gap-2 text-slate-500">
-                            <ImageIcon size={14} /> {imageLabel}
+                            <ImageIcon size={14} aria-hidden="true" /> {imageLabel}
                         </Label>
                         <button 
                             onClick={() => updateSlide(activeSlide.id, { enableImage: !activeSlide.enableImage }, true)}
+                            role="switch"
+                            aria-checked={!!activeSlide.enableImage}
+                            aria-label={imageLabel}
                             className={`w-10 h-6 rounded-full p-1 transition-colors ${activeSlide.enableImage ? 'bg-blue-500' : 'bg-slate-200 dark:bg-slate-800'}`}
                         >
                             <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${activeSlide.enableImage ? 'translate-x-4' : 'translate-x-0'}`} />
@@ -275,17 +281,17 @@ export const ContentPanel: React.FC<{
                 {showImageToggle && activeSlide.enableImage && (
                     <div className="space-y-4 pt-1 animate-in slide-in-from-top-1">
                         <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                            <button onClick={() => setImageTab('upload')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] rounded-md transition-all font-medium ${imageTab === 'upload' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}><Upload size={12} /> {t.upload}</button>
-                            <button onClick={() => setImageTab('url')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] rounded-md transition-all font-medium ${imageTab === 'url' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}><Link size={12} /> {t.url}</button>
+                            <button onClick={() => setImageTab('upload')} aria-pressed={imageTab === 'upload'} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] rounded-md transition-all font-medium ${imageTab === 'upload' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}><Upload size={12} aria-hidden="true" /> {t.upload}</button>
+                            <button onClick={() => setImageTab('url')} aria-pressed={imageTab === 'url'} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[10px] rounded-md transition-all font-medium ${imageTab === 'url' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}><Link size={12} aria-hidden="true" /> {t.url}</button>
                         </div>
                         
                         {imageTab === 'upload' && (
                             <div className="relative overflow-hidden group/upload">
-                                <button className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-xs py-8 flex flex-col items-center justify-center gap-3">
-                                    <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 group-hover/upload:text-blue-500 transition-colors"><Upload size={18} /></div>
+                                <button tabIndex={-1} aria-hidden="true" className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all text-xs py-8 flex flex-col items-center justify-center gap-3">
+                                    <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400 group-hover/upload:text-blue-500 transition-colors"><Upload size={18} aria-hidden="true" /></div>
                                     <div className="text-center"><span className="font-bold block">{t.clickToUpload}</span></div>
                                 </button>
-                                <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                <input type="file" accept="image/*" onChange={handleImageUpload} aria-label={t.clickToUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
                             </div>
                         )}
                         
@@ -303,15 +309,15 @@ export const ContentPanel: React.FC<{
                             <div className="flex gap-3 items-center p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 group/preview">
                                 <div className="w-12 h-12 rounded bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-300 dark:border-slate-700"><img src={activeSlide.imageUrl} className="w-full h-full object-cover" alt="Slide" /></div>
                                 <div className="flex-1 min-w-0"><div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate">{t.currentImage}</div><div className="text-[9px] text-slate-400 truncate opacity-70">{t.source}: {imageTab}</div></div>
-                                <button onClick={() => updateSlide(activeSlide.id, { imageUrl: undefined }, true)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"><Trash2 size={16} /></button>
+                                <button onClick={() => updateSlide(activeSlide.id, { imageUrl: undefined }, true)} title={t.delete} aria-label={t.delete} className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"><Trash2 size={16} aria-hidden="true" /></button>
                             </div>
                         )}
                         
                         {activeSlide.imageUrl && (
                             <div className="bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
-                                <button onClick={() => setShowImageSettings(!showImageSettings)} className="w-full flex items-center justify-between p-3 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    <div className="flex items-center gap-2"><Sliders size={12} className="text-blue-500" /> {t.advancedSettings}</div>
-                                    {showImageSettings ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                <button onClick={() => setShowImageSettings(!showImageSettings)} aria-expanded={showImageSettings} className="w-full flex items-center justify-between p-3 text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    <div className="flex items-center gap-2"><Sliders size={12} className="text-blue-500" aria-hidden="true" /> {t.advancedSettings}</div>
+                                    {showImageSettings ? <ChevronUp size={12} aria-hidden="true" /> : <ChevronDown size={12} aria-hidden="true" />}
                                 </button>
                                 {showImageSettings && (
                                     <div className="p-4 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 space-y-4">
@@ -334,7 +340,7 @@ export const ContentPanel: React.FC<{
 
 // --- ITEM EDITORS ---
 
-const SimpleListEditor: React.FC<{ items: string[]; onChange: (items: string[]) => void; t: any; label: string }> = ({ items, onChange, t, label }) => {
+const SimpleListEditor: React.FC<{ items: string[]; onChange: (items: string[]) => void; t: Translation; label: string }> = ({ items, onChange, t, label }) => {
     return (
         <div className="space-y-2">
             {items.map((item, idx) => (
@@ -357,9 +363,11 @@ const SimpleListEditor: React.FC<{ items: string[]; onChange: (items: string[]) 
                             const newItems = items.filter((_, i) => i !== idx);
                             onChange(newItems);
                         }}
+                        title={t.delete}
+                        aria-label={`${t.delete} ${idx + 1}`}
                         className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                     >
-                        <X size={14} />
+                        <X size={14} aria-hidden="true" />
                     </button>
                 </div>
             ))}
@@ -367,13 +375,13 @@ const SimpleListEditor: React.FC<{ items: string[]; onChange: (items: string[]) 
                 onClick={() => onChange([...items, ''])}
                 className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-1.5 mt-2"
             >
-                <Plus size={14} /> {t.addItem}
+                <Plus size={14} aria-hidden="true" /> {t.addItem}
             </button>
         </div>
     );
 };
 
-const KeyValueListEditor: React.FC<{ items: string[]; onChange: (items: string[]) => void; keyPlaceholder: string; valuePlaceholder: string; t: any }> = ({ items, onChange, keyPlaceholder, valuePlaceholder, t }) => {
+const KeyValueListEditor: React.FC<{ items: string[]; onChange: (items: string[]) => void; keyPlaceholder: string; valuePlaceholder: string; t: Translation }> = ({ items, onChange, keyPlaceholder, valuePlaceholder, t }) => {
     return (
         <div className="space-y-3">
             {items.map((item, idx) => {
@@ -391,9 +399,11 @@ const KeyValueListEditor: React.FC<{ items: string[]; onChange: (items: string[]
                                     const newItems = items.filter((_, i) => i !== idx);
                                     onChange(newItems);
                                 }}
+                                title={t.delete}
+                                aria-label={`${t.delete} ${idx + 1}`}
                                 className="text-slate-400 hover:text-red-500 transition-colors"
                             >
-                                <X size={12} />
+                                <X size={12} aria-hidden="true" />
                             </button>
                         </div>
                         <div className="flex gap-2">
@@ -429,20 +439,20 @@ const KeyValueListEditor: React.FC<{ items: string[]; onChange: (items: string[]
                 onClick={() => onChange([...items, ':'])}
                 className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-1.5"
             >
-                <Plus size={14} /> {t.addDataPoint}
+                <Plus size={14} aria-hidden="true" /> {t.addDataPoint}
             </button>
         </div>
     );
 };
 
-const ComparisonEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: any }> = ({ activeSlide, updateSlide, t }) => {
+const ComparisonEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: Translation }> = ({ activeSlide, updateSlide, t }) => {
     const metadata = activeSlide.metadata || {};
     const leftTitle = metadata.leftTitle || '';
     const rightTitle = metadata.rightTitle || '';
     const leftItems = metadata.leftItems || [];
     const rightItems = metadata.rightItems || [];
 
-    const updateMetadata = (key: string, value: any) => {
+    const updateMetadata = (key: string, value: SlideMetadataValue) => {
         updateSlide(activeSlide.id, { metadata: { ...metadata, [key]: value } });
     };
 
@@ -489,7 +499,7 @@ const ComparisonEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: str
     );
 };
 
-const GalleryEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: any }> = ({ activeSlide, updateSlide, t }) => {
+const GalleryEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: Translation }> = ({ activeSlide, updateSlide, t }) => {
     const images = activeSlide.metadata?.galleryImages || [];
     const updateImages = (newImages: string[]) => {
         updateSlide(activeSlide.id, { metadata: { ...activeSlide.metadata, galleryImages: newImages } });
@@ -527,31 +537,31 @@ const GalleryEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string
                      <div className="flex-1 min-w-0">
                          <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate">{t.image} {i + 1}</div>
                      </div>
-                     <button onClick={() => updateImages(images.filter((_, idx) => idx !== i))} className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"><Trash2 size={16} /></button>
+                     <button onClick={() => updateImages(images.filter((_, idx) => idx !== i))} title={t.delete} aria-label={`${t.delete} ${i + 1}`} className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-colors"><Trash2 size={16} aria-hidden="true" /></button>
                  </div>
              ))}
              
              <div className="flex gap-2">
                  <div className="flex-1 relative overflow-hidden group/upload">
-                    <button className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-1.5">
-                        <Upload size={14} /> {t.uploadImage}
+                    <button tabIndex={-1} aria-hidden="true" className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-1.5">
+                        <Upload size={14} aria-hidden="true" /> {t.uploadImage}
                     </button>
-                    <input type="file" accept="image/*" onChange={handleUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <input type="file" accept="image/*" onChange={handleUpload} aria-label={t.uploadImage} className="absolute inset-0 opacity-0 cursor-pointer" />
                  </div>
              </div>
         </div>
     );
 };
 
-const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: any }> = ({ activeSlide, updateSlide, t }) => {
+const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, data: Partial<SlideData>) => void; t: Translation }> = ({ activeSlide, updateSlide, t }) => {
     const members = activeSlide.metadata?.team || [];
-    const updateMembers = (newMembers: any[]) => {
+    const updateMembers = (newMembers: TeamMember[]) => {
         updateSlide(activeSlide.id, { metadata: { ...activeSlide.metadata, team: newMembers } });
     };
 
     const addMember = () => updateMembers([...members, { name: t.name, role: t.role }]);
 
-    const updateMember = (index: number, field: string, value: string) => {
+    const updateMember = (index: number, field: keyof TeamMember, value: string) => {
         const newMembers = [...members];
         newMembers[index] = { ...newMembers[index], [field]: value };
         updateMembers(newMembers);
@@ -585,12 +595,12 @@ const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, d
                 <div key={i} className="p-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                     <div className="flex justify-between items-center">
                         <div className="text-[10px] font-bold text-slate-400 uppercase">{t.member} {i + 1}</div>
-                        <button onClick={() => updateMembers(members.filter((_, idx) => idx !== i))} className="text-slate-400 hover:text-red-500"><X size={14} /></button>
+                        <button onClick={() => updateMembers(members.filter((_, idx) => idx !== i))} title={t.delete} aria-label={`${t.delete} ${i + 1}`} className="text-slate-400 hover:text-red-500"><X size={14} aria-hidden="true" /></button>
                     </div>
                     <div className="flex gap-3">
                         <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 group/avatar cursor-pointer">
-                            {m.imageUrl ? <img src={m.imageUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Users size={16} className="text-slate-400" /></div>}
-                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(i, e)} className="absolute inset-0 opacity-0 cursor-pointer" title="Change Avatar" />
+                            {m.imageUrl ? <img src={m.imageUrl} className="w-full h-full object-cover" alt={m.name || t.member} /> : <div className="w-full h-full flex items-center justify-center"><Users size={16} className="text-slate-400" aria-hidden="true" /></div>}
+                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(i, e)} className="absolute inset-0 opacity-0 cursor-pointer" title={t.changeAvatar} aria-label={t.changeAvatar} />
                         </div>
                         <div className="flex-1 space-y-2">
                              <DebouncedInput value={m.name} onChange={(val) => updateMember(i, 'name', val)} className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs font-bold" placeholder={t.name} />
@@ -600,7 +610,7 @@ const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, d
                 </div>
             ))}
             <button onClick={addMember} className="w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center justify-center gap-1.5">
-                <Plus size={14} /> {t.addMember}
+                <Plus size={14} aria-hidden="true" /> {t.addMember}
             </button>
         </div>
     );
@@ -609,7 +619,7 @@ const TeamEditor: React.FC<{ activeSlide: SlideData; updateSlide: (id: string, d
 export const ItemsPanel: React.FC<{ 
     activeSlide: SlideData, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
-    t: any
+    t: Translation
 }> = ({ activeSlide, updateSlide, t }) => {
     // History snapshots are handled by updateSlide(..., true) below, so this
     // panel does not need a separate saveSnapshot prop.
@@ -720,7 +730,7 @@ export const DesignPanel: React.FC<{
     activeSlide: SlideData, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
     saveSnapshot: () => void,
-    t: any,
+    t: Translation,
     language: Language
 }> = ({ activeSlide, updateSlide, saveSnapshot, t, language }) => {
     
@@ -868,10 +878,10 @@ export const DesignPanel: React.FC<{
                          <Label className="mb-2">{t.textAlignment}</Label>
                         <div className="flex rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                             {(['left', 'center', 'right'] as const).map(align => (
-                                <button key={align} onClick={() => updateSlide(activeSlide.id, { style: { ...style, textAlignment: align } }, true)} className={`flex-1 py-2 flex justify-center transition-colors ${ (style.textAlignment || 'left') === align ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
-                                        {align === 'left' && <AlignLeft size={16} />}
-                                        {align === 'center' && <AlignCenter size={16} />}
-                                        {align === 'right' && <AlignRight size={16} />}
+                                <button key={align} onClick={() => updateSlide(activeSlide.id, { style: { ...style, textAlignment: align } }, true)} aria-label={align} aria-pressed={(style.textAlignment || 'left') === align} title={align} className={`flex-1 py-2 flex justify-center transition-colors ${ (style.textAlignment || 'left') === align ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                                        {align === 'left' && <AlignLeft size={16} aria-hidden="true" />}
+                                        {align === 'center' && <AlignCenter size={16} aria-hidden="true" />}
+                                        {align === 'right' && <AlignRight size={16} aria-hidden="true" />}
                                 </button>
                             ))}
                         </div>
@@ -886,7 +896,7 @@ export const AnimationPanel: React.FC<{
     activeSlide: SlideData, 
     updateSlide: (id: string, data: Partial<SlideData>, withHistory?: boolean) => void,
     saveSnapshot: () => void,
-    t: any 
+    t: Translation 
 }> = ({ activeSlide, updateSlide, saveSnapshot, t }) => {
     const style = activeSlide.style || {};
     return (
@@ -910,7 +920,7 @@ export const CameraPanel: React.FC<{
     cameraConfig: CameraConfig, 
     setCameraConfig: (config: Partial<CameraConfig>, withHistory?: boolean) => void,
     saveSnapshot: () => void,
-    t: any
+    t: Translation
 }> = ({ cameraConfig, setCameraConfig, saveSnapshot, t }) => {
     const [tab, setTab] = useState<'overview' | 'focus'>('overview');
     

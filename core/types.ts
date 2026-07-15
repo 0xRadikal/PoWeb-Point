@@ -1,5 +1,12 @@
 // R3F JSX intrinsic elements are augmented globally in ./three-jsx.d.ts
 
+// The translation dictionary shape is derived from the single source of truth
+// (DICTIONARY in ./constants). `import type` keeps this a compile-time-only
+// reference, so it does not create a runtime circular import.
+import type { Translation } from './constants';
+
+export type { Translation };
+
 export type SlideType = 'content-image' | 'list' | 'big-number' | 'timeline' | 'comparison' | 'grid' | 'stats' | 'hero' | 'article' | 'quote' | 'gallery' | 'team' | 'process' | 'cta';
 export type Language = 'en' | 'fa';
 export type AnimationType = 'fade-up' | 'fade-in' | 'zoom' | 'slide-right' | 'slide-left';
@@ -54,6 +61,26 @@ export interface SlideStyle {
   animationEasing?: string;
 }
 
+export interface TeamMember {
+  name: string;
+  role: string;
+  imageUrl?: string;
+}
+
+// All values a slide's metadata entry can hold. Kept as a closed union so the
+// dynamic `updateMetadata(key, value)` helpers stay type-checked instead of `any`.
+export type SlideMetadataValue = string | string[] | TeamMember[] | undefined;
+
+export interface SlideMetadata {
+  leftTitle?: string;
+  rightTitle?: string;
+  leftItems?: string[];
+  rightItems?: string[];
+  galleryImages?: string[];
+  team?: TeamMember[];
+  [key: string]: SlideMetadataValue;
+}
+
 export interface SlideData {
   id: string;
   sectionId: string;
@@ -65,15 +92,7 @@ export interface SlideData {
   enableImage?: boolean;
   type: SlideType;
   style?: SlideStyle;
-  metadata?: {
-    leftTitle?: string;
-    rightTitle?: string;
-    leftItems?: string[];
-    rightItems?: string[];
-    galleryImages?: string[];
-    team?: { name: string; role: string; imageUrl?: string }[];
-    [key: string]: any;
-  };
+  metadata?: SlideMetadata;
 }
 
 export interface CameraConfig {
@@ -113,7 +132,7 @@ export interface AppState {
 export interface AppContextType extends AppState {
   slides: SlideData[];
   sections: Section[];
-  t: any;
+  t: Translation;
   setTheme: (theme: 'light' | 'dark') => void;
   setMode: (mode: 'dashboard' | 'presentation' | 'builder') => void;
   setCurrentSlideIndex: (index: number) => void;

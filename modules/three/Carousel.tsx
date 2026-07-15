@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
 import { SlideCard } from './SlideCard';
 
 export const CarouselRing: React.FC<{ radius: number }> = ({ radius }) => {
@@ -74,7 +74,7 @@ export const CarouselRing: React.FC<{ radius: number }> = ({ radius }) => {
         }
     });
 
-    const onPointerDown = useCallback((e: any) => {
+    const onPointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
         if (isTransitioning) return;
         if (e.button !== 0) return;
         e.stopPropagation();

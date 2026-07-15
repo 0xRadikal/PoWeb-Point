@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { useApp } from '../../core/store';
+import { useApp } from '../../core/AppContext';
 import { CheckSquare, Play, Eye, Box, Monitor, Unlock, Lock, RotateCcw, Layers, Sliders, Settings, BookOpen, LayoutGrid } from 'lucide-react';
 import { SlideManager } from './SlideManager';
 import { SlideEditor } from './SlideEditor';
@@ -203,12 +203,12 @@ export const BuilderPanel: React.FC = () => {
             {/* --- COLLAPSED SIDEBAR BUTTON (LEFT) --- */}
             {!leftSidebarOpen && (
                  <div className="hidden md:flex flex-col border-r rtl:border-r-0 rtl:border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-20 shrink-0 w-12 items-center py-4 gap-4">
-                     <button onClick={() => setLeftSidebarOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.outline}>
-                         <Layers size={20} />
+                     <button onClick={() => setLeftSidebarOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.outline} aria-label={t.outline}>
+                         <Layers size={20} aria-hidden="true" />
                      </button>
                      <div className="w-8 h-px bg-slate-200 dark:bg-slate-800" />
-                     <button onClick={() => setShowGuide(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.userGuide}>
-                         <Box size={20} />
+                     <button onClick={() => setShowGuide(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.userGuide} aria-label={t.userGuide}>
+                         <Box size={20} aria-hidden="true" />
                      </button>
                  </div>
             )}
@@ -227,36 +227,39 @@ export const BuilderPanel: React.FC = () => {
                            onClick={() => setMode('dashboard')}
                            className="flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-white dark:hover:bg-slate-800 transition-all mr-2"
                            title={t.exit}
+                           aria-label={t.exit}
                         >
-                           <LayoutGrid size={20} />
+                           <LayoutGrid size={20} aria-hidden="true" />
                         </button>
                         <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mr-2 shrink-0" />
 
                         <div className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 select-none">
-                            <Eye size={14} /> {t.preview}
+                            <Eye size={14} aria-hidden="true" /> {t.preview}
                         </div>
                         
                         {/* View Mode Toggle */}
                         <div className="flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1 gap-1 shrink-0">
                             <button 
                                 onClick={() => setBuilderPreviewMode('2d')}
+                                aria-pressed={builderPreviewMode === '2d'}
                                 className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${
                                     builderPreviewMode === '2d' 
                                     ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' 
                                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                 }`}
                             >
-                                <Monitor size={12} /> {t.view2d}
+                                <Monitor size={12} aria-hidden="true" /> {t.view2d}
                             </button>
                             <button 
                                 onClick={() => setBuilderPreviewMode('3d')}
+                                aria-pressed={builderPreviewMode === '3d'}
                                 className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${
                                     builderPreviewMode === '3d' 
                                     ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' 
                                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                 }`}
                             >
-                                <Box size={12} /> {t.view3d}
+                                <Box size={12} aria-hidden="true" /> {t.view3d}
                             </button>
                         </div>
                         
@@ -264,9 +267,11 @@ export const BuilderPanel: React.FC = () => {
                         {builderPreviewMode === '2d' && (
                              <button
                                 onClick={() => setAnimTrigger(prev => prev + 1)}
+                                aria-label={t.replay}
+                                title={t.replay}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md text-[10px] font-bold uppercase hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors shrink-0"
                             >
-                                <RotateCcw size={12} /> <span className="hidden sm:inline">{t.replay}</span>
+                                <RotateCcw size={12} aria-hidden="true" /> <span className="hidden sm:inline">{t.replay}</span>
                             </button>
                         )}
 
@@ -275,6 +280,8 @@ export const BuilderPanel: React.FC = () => {
                             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 pl-2 border-l border-slate-300 dark:border-slate-700 shrink-0">
                                 <button
                                     onClick={() => setIsFreeCamera(!isFreeCamera)}
+                                    aria-label={isFreeCamera ? t.freeCam : t.realCam}
+                                    aria-pressed={isFreeCamera}
                                     className={`flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${
                                         isFreeCamera
                                         ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
@@ -282,7 +289,7 @@ export const BuilderPanel: React.FC = () => {
                                     }`}
                                     title={isFreeCamera ? "Free Camera Mode" : "Locked to Presentation Config"}
                                 >
-                                    {isFreeCamera ? <Unlock size={12} /> : <Lock size={12} />}
+                                    {isFreeCamera ? <Unlock size={12} aria-hidden="true" /> : <Lock size={12} aria-hidden="true" />}
                                     <span className="hidden sm:inline">{isFreeCamera ? t.freeCam : t.realCam}</span>
                                 </button>
                                 
@@ -316,9 +323,11 @@ export const BuilderPanel: React.FC = () => {
 
                      <button 
                         onClick={() => setMode('presentation')} 
+                        aria-label={t.present}
+                        title={t.present}
                         className="flex items-center gap-2 px-3 md:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-xs font-bold shadow-lg shadow-green-500/20 transition-all hover:scale-105 shrink-0"
                     >
-                        <Play size={12} fill="currentColor" /> <span className="hidden sm:inline">{t.present}</span>
+                        <Play size={12} fill="currentColor" aria-hidden="true" /> <span className="hidden sm:inline">{t.present}</span>
                      </button>
                 </div>
 
@@ -359,12 +368,12 @@ export const BuilderPanel: React.FC = () => {
             {/* --- RIGHT SIDEBAR & FOOTER --- */}
             {!rightSidebarOpen && (
                  <div className="hidden md:flex flex-col border-l rtl:border-l-0 rtl:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-20 shrink-0 w-12 items-center py-4 gap-4">
-                     <button onClick={() => setRightSidebarOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.properties}>
-                         <Settings size={20} />
+                     <button onClick={() => setRightSidebarOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-blue-500 transition-colors" title={t.properties} aria-label={t.properties}>
+                         <Settings size={20} aria-hidden="true" />
                      </button>
                      <div className="w-8 h-px bg-slate-200 dark:bg-slate-800" />
-                     <button onClick={() => setMode('dashboard')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-green-500 transition-colors" title={t.done}>
-                         <CheckSquare size={20} />
+                     <button onClick={() => setMode('dashboard')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 hover:text-green-500 transition-colors" title={t.done} aria-label={t.done}>
+                         <CheckSquare size={20} aria-hidden="true" />
                      </button>
                  </div>
             )}
@@ -382,7 +391,7 @@ export const BuilderPanel: React.FC = () => {
                     </div>
                     <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0 z-30 hidden md:block">
                          <button onClick={() => setMode('dashboard')} className="w-full py-3 bg-slate-800 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 rounded-lg text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
-                            <CheckSquare size={16} />
+                            <CheckSquare size={16} aria-hidden="true" />
                             {t.done}
                          </button>
                     </div>
@@ -390,10 +399,10 @@ export const BuilderPanel: React.FC = () => {
             </div>
 
             <div className="md:hidden h-14 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-around shrink-0 z-50 fixed bottom-0 left-0 right-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                <button onClick={() => { setActiveTab('outline'); setLeftSidebarOpen(true); }} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'outline' ? 'text-blue-500' : 'text-slate-400'}`}><Layers size={20} /><span className="text-[10px] font-bold uppercase">{t.outline}</span></button>
-                <button onClick={() => setActiveTab('preview')} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'preview' ? 'text-blue-500' : 'text-slate-400'}`}><Eye size={20} /><span className="text-[10px] font-bold uppercase">{t.preview}</span></button>
-                <button onClick={() => { setActiveTab('properties'); setRightSidebarOpen(true); }} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'properties' ? 'text-blue-500' : 'text-slate-400'}`}><Sliders size={20} /><span className="text-[10px] font-bold uppercase">{t.properties}</span></button>
-                <button onClick={() => setShowGuide(true)} className="flex flex-col items-center gap-1 p-2 flex-1 text-slate-400 hover:text-blue-500"><BookOpen size={20} /><span className="text-[10px] font-bold uppercase">{t.userGuide}</span></button>
+                <button onClick={() => { setActiveTab('outline'); setLeftSidebarOpen(true); }} aria-current={activeTab === 'outline' ? 'page' : undefined} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'outline' ? 'text-blue-500' : 'text-slate-400'}`}><Layers size={20} aria-hidden="true" /><span className="text-[10px] font-bold uppercase">{t.outline}</span></button>
+                <button onClick={() => setActiveTab('preview')} aria-current={activeTab === 'preview' ? 'page' : undefined} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'preview' ? 'text-blue-500' : 'text-slate-400'}`}><Eye size={20} aria-hidden="true" /><span className="text-[10px] font-bold uppercase">{t.preview}</span></button>
+                <button onClick={() => { setActiveTab('properties'); setRightSidebarOpen(true); }} aria-current={activeTab === 'properties' ? 'page' : undefined} className={`flex flex-col items-center gap-1 p-2 flex-1 ${activeTab === 'properties' ? 'text-blue-500' : 'text-slate-400'}`}><Sliders size={20} aria-hidden="true" /><span className="text-[10px] font-bold uppercase">{t.properties}</span></button>
+                <button onClick={() => setShowGuide(true)} className="flex flex-col items-center gap-1 p-2 flex-1 text-slate-400 hover:text-blue-500"><BookOpen size={20} aria-hidden="true" /><span className="text-[10px] font-bold uppercase">{t.userGuide}</span></button>
             </div>
         </div>
     );

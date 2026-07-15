@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { motion as _motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LogOut, Edit3 } from 'lucide-react';
-import { useApp } from '../../core/store';
-
-const motion = _motion as any;
+import { useApp } from '../../core/AppContext';
 
 export const Sidebar: React.FC = () => {
   const { 
@@ -27,9 +25,12 @@ export const Sidebar: React.FC = () => {
     <>
       <button
         onClick={toggleMenu}
+        aria-label={menuOpen ? t.a11yCloseMenu : t.a11yOpenMenu}
+        aria-expanded={menuOpen}
+        aria-haspopup="dialog"
         className="fixed top-4 md:top-8 z-[60] p-2 md:p-3 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur shadow-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white transition-transform hover:scale-105 active:scale-95 ltr:right-4 md:ltr:right-8 rtl:left-4 md:rtl:left-8"
       >
-        {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
       </button>
 
       <AnimatePresence>
@@ -40,6 +41,7 @@ export const Sidebar: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={toggleMenu}
+              aria-hidden="true"
               className="fixed inset-0 bg-black/40 z-[55] backdrop-blur-sm"
             />
             
@@ -48,6 +50,9 @@ export const Sidebar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: isRtl ? '-100%' : '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={t.contents}
               className="fixed top-0 h-full w-[85vw] md:w-96 bg-white dark:bg-slate-900 shadow-2xl z-[60] border-slate-200 dark:border-slate-800 flex flex-col ltr:right-0 ltr:border-l rtl:left-0 rtl:border-r"
             >
                <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 mt-12 md:mt-12">
@@ -55,7 +60,7 @@ export const Sidebar: React.FC = () => {
                    <p className="text-sm text-slate-500 mt-2">{t.navigateBy}</p>
                </div>
 
-               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6">
+               <nav aria-label={t.a11yNavigation} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6">
                    {sections.map((section) => {
                        const sectionSlides = slides.filter(s => s.sectionId === section.id);
                        const isActive = section.id === activeSectionId;
@@ -93,7 +98,7 @@ export const Sidebar: React.FC = () => {
                            </div>
                        )
                    })}
-               </div>
+               </nav>
 
                <div className="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
                     <button 
@@ -103,8 +108,8 @@ export const Sidebar: React.FC = () => {
                         }}
                         className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors font-medium text-sm md:text-base"
                     >
-                        <Edit3 size={18} />
-                        Edit Slide
+                        <Edit3 size={18} aria-hidden="true" />
+                        {t.editSlide}
                     </button>
                     <button 
                         onClick={() => {
@@ -113,7 +118,7 @@ export const Sidebar: React.FC = () => {
                         }}
                         className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-500/20 transition-colors font-medium text-sm md:text-base"
                     >
-                        <LogOut size={18} className="rtl:rotate-180" />
+                        <LogOut size={18} className="rtl:rotate-180" aria-hidden="true" />
                         {t.exit}
                     </button>
                     <div className="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest text-center pt-2">

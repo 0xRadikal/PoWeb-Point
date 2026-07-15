@@ -1,6 +1,7 @@
 
 
 import { Section, SlideData, SlideType, CameraConfig } from './types';
+import type { LucideIcon } from 'lucide-react';
 import { Image as ImageIcon, List, Hash, CalendarClock, SplitSquareHorizontal, LayoutGrid, BarChart3, Megaphone, FileText, Quote, Users, ArrowRightCircle, MousePointerClick, Images } from 'lucide-react';
 
 export const FONTS = {
@@ -36,7 +37,7 @@ export const DEFAULT_CAMERA_CONFIG: CameraConfig = {
     transitionTension: 0.5
 };
 
-export const SLIDE_TYPE_OPTS: { type: SlideType; labelKey: string; icon: any }[] = [
+export const SLIDE_TYPE_OPTS: { type: SlideType; labelKey: string; icon: LucideIcon }[] = [
     { type: 'hero', labelKey: 'typeHero', icon: Megaphone },
     { type: 'article', labelKey: 'typeArticle', icon: FileText },
     { type: 'content-image', labelKey: 'typeImageText', icon: ImageIcon },
@@ -125,12 +126,25 @@ export const DICTIONARY = {
     // General
     contents: 'Contents',
     navigateBy: 'Navigate by section',
+    // Accessibility labels (used for aria-label on icon-only controls)
+    a11yToggleTheme: 'Toggle light or dark theme',
+    a11yToggleLanguage: 'Toggle language',
+    a11yOpenMenu: 'Open navigation menu',
+    a11yCloseMenu: 'Close navigation menu',
+    a11yNavigation: 'Slide navigation',
+    a11yPreviousSlide: 'Previous slide',
+    a11yNextSlide: 'Next slide',
+    a11yEnterBuilder: 'Open slide editor',
+    a11yShowInfo: 'Show information',
+    a11yClose: 'Close',
+    a11yProgress: 'Presentation progress',
     slide: 'Slide',
     remaining: 'remaining',
     quickStart: 'Quick Start',
     dragExplore: 'Drag to rotate • Click center to present',
     projectTitle: 'Radikal Presenter',
     exit: 'Exit Presentation',
+    editSlide: 'Edit Slide',
     theEnd: 'The End',
     pressEsc: 'Press ESC to exit',
     noSlides: 'No slide to display',
@@ -144,6 +158,8 @@ export const DICTIONARY = {
     undo: 'Undo',
     redo: 'Redo',
     duplicate: 'Duplicate',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
     delete: 'Delete',
     reset: 'Factory Reset',
     resetConfirm: 'Are you sure you want to reset everything? This will restore the original template and default camera settings. All changes will be lost.',
@@ -232,6 +248,7 @@ export const DICTIONARY = {
     name: 'Name',
     role: 'Role',
     addMember: 'Add Team Member',
+    changeAvatar: 'Change avatar',
     buttonLabel: 'Button Label',
     stepTitle: 'Step Title',
     value: 'Value',
@@ -252,6 +269,8 @@ export const DICTIONARY = {
     default: 'Default',
     direction: 'Direction',
     alignment: 'Text Alignment',
+    textAlignment: 'Text Alignment',
+    contentWidth: 'Content Width',
     width: 'Content Width',
     opacity: 'Opacity',
     scale: 'Scale',
@@ -355,12 +374,25 @@ export const DICTIONARY = {
     // General
     contents: 'فهرست مطالب',
     navigateBy: 'پیمایش بر اساس بخش',
+    // Accessibility labels (used for aria-label on icon-only controls)
+    a11yToggleTheme: 'تغییر پوسته روشن یا تیره',
+    a11yToggleLanguage: 'تغییر زبان',
+    a11yOpenMenu: 'باز کردن منوی پیمایش',
+    a11yCloseMenu: 'بستن منوی پیمایش',
+    a11yNavigation: 'پیمایش اسلایدها',
+    a11yPreviousSlide: 'اسلاید قبلی',
+    a11yNextSlide: 'اسلاید بعدی',
+    a11yEnterBuilder: 'باز کردن ویرایشگر اسلاید',
+    a11yShowInfo: 'نمایش اطلاعات',
+    a11yClose: 'بستن',
+    a11yProgress: 'پیشرفت ارائه',
     slide: 'اسلاید',
     remaining: 'باقی‌مانده',
     quickStart: 'شروع سریع',
     dragExplore: 'بکشید تا بچرخد • برای ارائه کلیک کنید',
     projectTitle: 'رادیکال پرزنتر',
     exit: 'خروج از ارائه',
+    editSlide: 'ویرایش اسلاید',
     theEnd: 'پایان',
     pressEsc: 'برای خروج ESC را بزنید',
     noSlides: 'اسلایدی برای نمایش وجود ندارد',
@@ -374,6 +406,8 @@ export const DICTIONARY = {
     undo: 'بازگشت',
     redo: 'انجام مجدد',
     duplicate: 'کپی',
+    moveUp: 'انتقال به بالا',
+    moveDown: 'انتقال به پایین',
     delete: 'حذف',
     reset: 'بازنشانی',
     resetConfirm: 'آیا مطمئن هستید؟ این کار تمام تغییرات را پاک کرده و به حالت اولیه باز می‌گرداند.',
@@ -462,6 +496,7 @@ export const DICTIONARY = {
     name: 'نام',
     role: 'نقش',
     addMember: 'افزودن عضو تیم',
+    changeAvatar: 'تغییر تصویر',
     buttonLabel: 'برچسب دکمه',
     stepTitle: 'عنوان مرحله',
     value: 'مقدار',
@@ -482,6 +517,8 @@ export const DICTIONARY = {
     default: 'پیش‌فرض',
     direction: 'جهت',
     alignment: 'تراز متن',
+    textAlignment: 'تراز متن',
+    contentWidth: 'عرض محتوا',
     width: 'عرض محتوا',
     opacity: 'شفافیت',
     scale: 'مقیاس',
@@ -582,3 +619,6 @@ export const DICTIONARY = {
     factoryResetDesc: 'بازگرداندن قالب پیش‌فرض. این عمل قابل بازگشت نیست.'
   }
 };
+// Compile-time shape of the translation dictionary for a single language.
+// `t` in the store is `DICTIONARY[language]`, so this union matches it exactly.
+export type Translation = (typeof DICTIONARY)['en' | 'fa'];

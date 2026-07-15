@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, memo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Text, RoundedBox, Float, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 import { SlideData } from '../../core/types';
@@ -120,7 +120,7 @@ export const SlideCard: React.FC<{
     cameraMode: 'overview' | 'focus';
     onDoubleClick: () => void;
     onClick: () => void;
-    onPointerDown: (e: any) => void;
+    onPointerDown: (e: ThreeEvent<PointerEvent>) => void;
     isDark: boolean;
     isFarsi: boolean;
 }> = memo(({ slide, index, sectionTitle, isActive, onDoubleClick, onClick, onPointerDown, isDark, isFarsi }) => {
