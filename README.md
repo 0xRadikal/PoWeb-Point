@@ -183,6 +183,21 @@ npm run preview    # serve the built dist/ locally to smoke-test
 * `npm run test:watch` – Run unit tests in watch mode
 * `npm run check` – typecheck + lint + test (used by CI)
 
+### 6. Quality & accessibility
+
+The codebase is kept production-clean and is verified end-to-end on Node 20:
+
+* **Type safety** – zero `no-explicit-any`; strict `tsc --noEmit` passes.
+* **Lint** – `eslint --max-warnings=0` passes (no suppressed warnings).
+* **Dependencies** – `npm audit` reports **0 vulnerabilities**. React 18 type
+  integrity is enforced via `overrides` (`@types/react`/`@types/react-dom`).
+* **Accessibility** – icon-only controls expose localized `aria-label`s,
+  decorative icons are `aria-hidden`, toggles use `aria-expanded` /
+  `aria-pressed` / `role="switch"`, the progress bar uses `role="progressbar"`,
+  navigation uses landmark/`aria-current` semantics, and the User Guide is a
+  fully-trapped `role="dialog"` (Escape to close, focus restore) with an ARIA
+  tablist. Keyboard navigation (Arrows / Space / Enter / Escape) is supported.
+
 ---
 
 ## 🎮 Core Concepts & Usage
