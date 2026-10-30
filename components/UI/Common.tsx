@@ -52,6 +52,15 @@ export const DebouncedInput: React.FC<{
         setLocalValue(e.target.value);
     };
 
+    // Flush immediately on blur as well. Without this, anything typed within
+    // the debounce window is dropped when focus moves to a control that reads
+    // the store value right away (e.g. a toolbar button).
+    const handleBlur = () => {
+        if (localValue !== value) {
+            onChange(String(localValue));
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.currentTarget.blur();
@@ -64,6 +73,7 @@ export const DebouncedInput: React.FC<{
             dir={dir}
             value={localValue}
             onChange={handleChange}
+            onBlur={handleBlur}
             onFocus={onFocus}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
@@ -101,6 +111,9 @@ export const DebouncedTextarea = forwardRef<HTMLTextAreaElement, {
             dir={dir}
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
+            // Flush on blur too (see DebouncedInput): the Markdown toolbar
+            // reads the store value, so a pending debounce must not be lost.
+            onBlur={() => { if (localValue !== value) onChange(localValue); }}
             onFocus={onFocus}
             rows={rows}
             placeholder={placeholder}
