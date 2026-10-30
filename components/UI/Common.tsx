@@ -31,16 +31,30 @@ export const DebouncedInput: React.FC<{
     dir?: string;
 }> = ({ value, onChange, onFocus, placeholder, type = "text", className = "", dir }) => {
     const [localValue, setLocalValue] = useState(value);
-    
+
     // Sync local state if external prop changes (e.g. undo/redo)
     useEffect(() => {
         setLocalValue(value);
     }, [value]);
 
+    // Propagate changes immediately with a tiny debounce so the preview updates while typing
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (localValue !== value) {
+                onChange(String(localValue));
+            }
+        }, 100);
+
+        return () => clearTimeout(timeout);
+    }, [localValue, value, onChange]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLocalValue(e.target.value);
     };
 
+    // Flush immediately on blur as well. Without this, anything typed within
+    // the debounce window is dropped when focus moves to a control that reads
+    // the store value right away (e.g. a toolbar button).
     const handleBlur = () => {
         if (localValue !== value) {
             onChange(String(localValue));
@@ -81,13 +95,25 @@ export const DebouncedTextarea = forwardRef<HTMLTextAreaElement, {
 
     useEffect(() => { setLocalValue(value); }, [value]);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (localValue !== value) {
+                onChange(localValue);
+            }
+        }, 120);
+
+        return () => clearTimeout(timeout);
+    }, [localValue, value, onChange]);
+
     return (
         <textarea
             ref={ref}
             dir={dir}
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
-            onBlur={() => { if(localValue !== value) onChange(localValue); }}
+            // Flush on blur too (see DebouncedInput): the Markdown toolbar
+            // reads the store value, so a pending debounce must not be lost.
+            onBlur={() => { if (localValue !== value) onChange(localValue); }}
             onFocus={onFocus}
             rows={rows}
             placeholder={placeholder}
